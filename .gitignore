@@ -41,3 +41,10 @@ next-env.d.ts
 
 # ngrok
 *.ngrok-authtoken
+
+# Large media assets (too heavy for GitHub — host on CDN)
+src/assets/videos/
+src/assets/audio/
+public/*.mp4
+public/*.mov
+public/*.webm
