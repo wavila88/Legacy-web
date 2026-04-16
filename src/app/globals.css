@@ -1,0 +1,207 @@
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --primary:        #7C3AED;
+  --primary-light:  #A78BFA;
+  --primary-dark:   #5B21B6;
+  --primary-bg:     #F5F3FF;
+  --outline:        #D8B4FE;
+  --surface:        #FFFFFF;
+  --surface-variant:#EDE9FE;
+  --text:           #1F2937;
+  --text-muted:     #6B7280;
+  --error:          #DC2626;
+  --error-bg:       #FEE2E2;
+  --success:        #059669;
+  --success-bg:     #ECFDF5;
+  --success-border: #6EE7B7;
+}
+
+html, body {
+  height: 100%;
+  overscroll-behavior: none;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    'Helvetica Neue', Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  background: var(--primary-bg);
+  color: var(--text);
+}
+
+input, select, textarea, button {
+  font-family: inherit;
+  font-size: inherit;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* ── Shared card ── */
+.card {
+  background: var(--surface);
+  border-radius: 20px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.08);
+}
+
+/* ── Shared label ── */
+.field-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--primary-dark);
+  margin-bottom: 8px;
+  display: block;
+}
+
+/* ── Shared input ── */
+.field-input {
+  width: 100%;
+  padding: 14px;
+  border: 1px solid var(--outline);
+  border-radius: 12px;
+  font-size: 15px;
+  color: var(--text);
+  background: var(--surface);
+  transition: border-color 0.15s;
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.field-input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.12);
+}
+
+.field-input.error {
+  border-color: var(--error);
+}
+
+.field-input::placeholder {
+  color: var(--text-muted);
+}
+
+/* ── Error text ── */
+.error-text {
+  font-size: 13px;
+  color: var(--error);
+  margin-top: 4px;
+  display: block;
+}
+
+/* ── Primary button ── */
+.btn-primary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 18px 32px;
+  background: var(--primary);
+  color: #fff;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  box-shadow: 0 10px 30px rgba(124, 58, 237, 0.45);
+  transition: opacity 0.15s, transform 0.1s;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.btn-primary:active {
+  opacity: 0.88;
+  transform: scale(0.98);
+}
+
+.btn-primary:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ── Top bar ── */
+.topbar {
+  background: var(--primary);
+  padding: 52px 16px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.topbar-title {
+  color: #fff;
+  font-size: 17px;
+  font-weight: 700;
+  text-align: center;
+  flex: 1;
+}
+
+.topbar-back {
+  color: rgba(255,255,255,0.9);
+  font-size: 15px;
+  font-weight: 500;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  width: 72px;
+  text-align: left;
+}
+
+/* ── Divider ── */
+.divider {
+  height: 1px;
+  background: var(--surface-variant);
+  margin: 14px 0;
+}
+
+/* ── Home background video ── */
+.bg-video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 15%;
+  z-index: 0;
+}
+
+/* On wider screens move the focal point up so faces are visible */
+@media (min-width: 768px) {
+  .bg-video {
+    object-position: center 30%;
+  }
+}
+
+/* ── Section title inside card ── */
+.card-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--primary-dark);
+}
+
+.card-subtitle {
+  font-size: 13px;
+  color: var(--primary-light);
+  margin-top: 4px;
+}
