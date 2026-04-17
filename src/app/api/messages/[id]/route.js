@@ -1,17 +1,20 @@
 import { NextResponse } from 'next/server';
-import { getMessage } from '@/lib/db';
+import { getMessage } from '@/lib/repository/messageRepository';
 
-/**
- * GET /api/messages/[id]
- * Returns the message data for a given ID.
- */
 export async function GET(request, { params }) {
   const { id } = params;
-  const message = getMessage(id);
+  const message = await getMessage(id);
 
   if (!message) {
     return NextResponse.json({ error: 'Mensaje no encontrado.' }, { status: 404 });
   }
 
-  return NextResponse.json(message);
+  // Convertir bytea → base64 data URL para que el browser pueda reproducirlo
+  const response = { ...message };
+  if (message.file_data) {
+    response.file_url = `data:audio/webm;base64,${Buffer.from(message.file_data).toString('base64')}`;
+  }
+  delete response.file_data;
+
+  return NextResponse.json(response);
 }

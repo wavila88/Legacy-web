@@ -42,5 +42,6 @@ next-env.d.ts
 # ngrok
 *.ngrok-authtoken
 
-# Large media assets — tracked via Git LFS
+# Source media assets (large originals)
+src/assets/videos/
 src/assets/audio/

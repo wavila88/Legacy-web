@@ -174,7 +174,7 @@ a {
   margin: 14px 0;
 }
 
-/* ── Home background video ── */
+/* ── Home background image ── */
 .bg-video {
   position: absolute;
   top: 0;
@@ -182,14 +182,13 @@ a {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center 15%;
+  object-position: center 20%;
   z-index: 0;
 }
 
-/* On wider screens move the focal point up so faces are visible */
-@media (min-width: 768px) {
+@media (min-width: 520px) {
   .bg-video {
-    object-position: center 30%;
+    object-position: center 40%;
   }
 }
 

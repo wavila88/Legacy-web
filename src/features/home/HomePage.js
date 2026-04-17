@@ -1,63 +1,41 @@
-'use client';
-
 import Link from 'next/link';
-import { useEffect, useRef } from 'react';
 
 export default function HomePage() {
-  const videoRef = useRef(null);
-
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-    // Fix React SSR bug: muted is not reflected in HTML attribute, set via DOM
-    video.muted = true;
-    video.volume = 0;
-    const tryPlay = () => video.play().catch(() => {});
-    // Play immediately and also when data is available
-    tryPlay();
-    video.addEventListener('loadeddata', tryPlay, { once: true });
-    return () => video.removeEventListener('loadeddata', tryPlay);
-  }, []);
-
   return (
     <div style={styles.container}>
-      <video
-        ref={videoRef}
-        autoPlay
-        muted
-        loop
-        playsInline
-        preload="auto"
-        src="/padre-hija-v2.mp4"
-        className="bg-video"
-        style={styles.bgVideo}
-      />
+        <img
+          src="/padre-hija.png"
+          alt=""
+          aria-hidden="true"
+          className="bg-video"
+          style={styles.bgImage}
+        />
 
-      <div style={styles.gradient} />
+        <div style={styles.gradient} />
 
-      <div style={styles.content}>
-        <div style={styles.bottom}>
-          <p style={styles.tagline}>Un regalo que trasciende el tiempo</p>
+        <div style={styles.content}>
+          <div style={styles.bottom}>
+            <p style={styles.tagline}>Un regalo que trasciende el tiempo</p>
 
-          <h1 style={styles.title}>Legado</h1>
-          <h1 style={styles.titleAccent}>Mensajes</h1>
+            <h1 style={styles.title}>Legado</h1>
+            <h1 style={styles.titleAccent}>Mensajes</h1>
 
-          <p style={styles.description}>
-            Deja tu amor, tu sabiduría y tu voz<br />
-            para las personas que más quieres.
-          </p>
+            <p style={styles.description}>
+              Deja tu amor, tu sabiduría y tu voz<br />
+              para las personas que más quieres.
+            </p>
 
-          <Link href="/create" style={styles.cta}>
-            Crear un Mensaje
-            <span style={styles.ctaArrow}>&#8594;</span>
-          </Link>
+            <Link href="/create" style={styles.cta}>
+              Crear un Mensaje
+              <span style={styles.ctaArrow}>&#8594;</span>
+            </Link>
 
-          <p style={styles.disclaimer}>
-            Tus mensajes se entregan únicamente en la fecha que elijas.
-          </p>
+            <p style={styles.disclaimer}>
+              Tus mensajes se entregan únicamente en la fecha que elijas.
+            </p>
+          </div>
         </div>
       </div>
-    </div>
   );
 }
 
@@ -68,7 +46,7 @@ const styles = {
     backgroundColor: '#1a0533',
     overflow: 'hidden',
   },
-  bgVideo: {
+  bgImage: {
     position: 'absolute',
     top: 0,
     left: 0,

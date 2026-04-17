@@ -1,25 +1,11 @@
 import { NextResponse } from 'next/server';
 import { randomUUID } from 'crypto';
-import { saveMessage } from '@/lib/db';
+import { saveMessage } from '@/lib/repository/messageRepository';
 
-/**
- * POST /api/messages
- *
- * Body (JSON):
- *   parent_name   string  required
- *   child_name    string  required
- *   nickname      string  optional
- *   email         string  optional
- *   delivery_date string  required  (ISO date: "2030-06-15")
- *   file_url      string  optional  (storage URL from upload step)
- *   message_text  string  optional
- *
- * Returns: { id, message }
- */
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { parent_name, parent_nickname, child_name, nickname, email, delivery_date, file_url, file_type, message_text } = body;
+    const { parent_name, parent_nickname, child_name, nickname, email, phone, delivery_date, file_url, file_type, message_text } = body;
 
     if (!parent_name?.trim() || !child_name?.trim() || !delivery_date) {
       return NextResponse.json(
@@ -28,22 +14,31 @@ export async function POST(request) {
       );
     }
 
-    const message = {
-      id: randomUUID(),
-      parent_name: parent_name.trim(),
-      parent_nickname: parent_nickname?.trim() || null,
-      child_name: child_name.trim(),
-      nickname: nickname?.trim() || null,
-      email: email?.trim() || null,
-      delivery_date,
-      file_url: file_url || null,
-      file_type: file_type || null,
-      message_text: message_text?.trim() || null,
-      delivered: false,
-      created_at: new Date().toISOString(),
-    };
+    // Si el audio viene como base64 data URL, extraer los bytes y guardar en file_data
+    let audioBuffer = null;
+    let storedFileUrl = file_url ?? null;
 
-    saveMessage(message);
+    if (file_type === 'audio' && file_url?.startsWith('data:')) {
+      const base64 = file_url.split(',')[1];
+      audioBuffer = Buffer.from(base64, 'base64');
+      storedFileUrl = null; // no guardamos la URL, guardamos los bytes
+    }
+
+    const message = await saveMessage({
+      id:              randomUUID(),
+      parent_name:     parent_name.trim(),
+      parent_nickname: parent_nickname?.trim() ?? null,
+      child_name:      child_name.trim(),
+      nickname:        nickname?.trim() ?? null,
+      email:           email?.trim() ?? null,
+      phone:           phone?.trim() ?? null,
+      delivery_date,
+      file_url:        storedFileUrl,
+      file_type:       file_type ?? null,
+      file_data:       audioBuffer,
+      message_text:    message_text?.trim() ?? null,
+      delivered:       false,
+    });
 
     return NextResponse.json({ id: message.id, message }, { status: 201 });
   } catch (err) {

@@ -32,6 +32,7 @@ export default function CreateMessagePage() {
     child_name:       '',
     nickname:         '',
     email:            '',
+    phone:            '',
     delivery_date:    defaultDeliveryDate(),
     delivery_time:    '09:00',
     tipo_mensaje:     'Cumpleaños',
@@ -153,6 +154,7 @@ export default function CreateMessagePage() {
           child_name:      form.child_name,
           nickname:        form.nickname || null,
           email:         form.email,
+          phone:         form.phone || null,
           delivery_date,
           file_url,
           file_type,
@@ -232,6 +234,16 @@ export default function CreateMessagePage() {
               value={form.email}
               onChange={(e) => set('email', e.target.value)}
               autoCapitalize="none"
+            />
+          </Field>
+          <Field label="Celular / WhatsApp (opcional)" error={null}>
+            <input
+              className="field-input"
+              type="tel"
+              inputMode="tel"
+              placeholder="Ej: +1 809 555 0000"
+              value={form.phone}
+              onChange={(e) => set('phone', e.target.value)}
             />
           </Field>
         </div>

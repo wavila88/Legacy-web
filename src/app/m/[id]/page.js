@@ -4,6 +4,6 @@ export async function generateMetadata({ params }) {
   return getMetadata(params.id);
 }
 
-export default function Page({ params }) {
+export default async function Page({ params }) {
   return <ViewMessagePage id={params.id} />;
 }

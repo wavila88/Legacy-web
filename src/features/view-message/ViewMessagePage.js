@@ -1,9 +1,9 @@
 import Link from 'next/link';
-import { getMessage } from '../../lib/db';
+import { getMessage } from '../../lib/repository/messageRepository';
 import MediaPlayer from './MediaPlayer';
 
-export function generateMetadata(id) {
-  const message = getMessage(id);
+export async function generateMetadata(id) {
+  const message = await getMessage(id);
   if (!message) return { title: 'Mensaje no encontrado' };
   return {
     title: `Mensaje para ${message.nickname || message.child_name} | Legado`,
@@ -11,8 +11,15 @@ export function generateMetadata(id) {
   };
 }
 
-export default function ViewMessagePage({ id }) {
-  const message = getMessage(id);
+export default async function ViewMessagePage({ id }) {
+  const raw = await getMessage(id);
+
+  // Convertir file_data (bytea) → base64 data URL para reproducir en browser
+  let message = raw;
+  if (raw?.file_data) {
+    message = { ...raw, file_url: `data:audio/webm;base64,${Buffer.from(raw.file_data).toString('base64')}` };
+    delete message.file_data;
+  }
 
   if (!message) {
     return (
