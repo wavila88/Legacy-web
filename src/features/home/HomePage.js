@@ -30,6 +30,10 @@ export default function HomePage() {
               <span style={styles.ctaArrow}>&#8594;</span>
             </Link>
 
+            <Link href="/my-messages" style={styles.ctaSecondary}>
+              💌 Ver mis mensajes
+            </Link>
+
             <p style={styles.disclaimer}>
               Tus mensajes se entregan únicamente en la fecha que elijas.
             </p>
@@ -140,6 +144,24 @@ const styles = {
     fontSize: 22,
     fontWeight: 400,
     lineHeight: 1,
+  },
+  ctaSecondary: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    width: '100%',
+    maxWidth: 480,
+    paddingTop: 16,
+    paddingBottom: 16,
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    color: '#C4B5FD',
+    fontSize: 16,
+    fontWeight: 600,
+    borderRadius: 50,
+    border: '1.5px solid rgba(196,181,253,0.3)',
+    cursor: 'pointer',
+    WebkitTapHighlightColor: 'transparent',
   },
   disclaimer: {
     fontSize: 12,

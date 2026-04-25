@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useRef, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import VideoUploader from './components/VideoUploader';
 import { uploadFile } from './services/uploadService';
 import { minDeliveryDate, defaultDeliveryDate } from './utils/dateUtils';
@@ -17,25 +17,45 @@ function blobToDataURL(blob) {
 }
 
 const TIPOS_MENSAJE = [
-  { etiqueta: '🎂  Cumpleaños',  valor: 'Cumpleaños' },
-  { etiqueta: '💍  Boda',        valor: 'Boda' },
-  { etiqueta: '🎊  Aniversario', valor: 'Aniversario' },
+  { etiqueta: '🎂  Birthday',    valor: 'Birthday' },
+  { etiqueta: '💍  Wedding',     valor: 'Wedding' },
+  { etiqueta: '🎊  Anniversary', valor: 'Anniversary' },
   { etiqueta: '💌  General',     valor: 'General' },
 ];
 
+const RELATIONSHIPS = [
+  { label: '👧 Hija',     value: 'Hija' },
+  { label: '👦 Hijo',     value: 'Hijo' },
+  { label: '💑 Esposa',   value: 'Esposa' },
+  { label: '👨 Esposo',   value: 'Esposo' },
+  { label: '👵 Madre',    value: 'Madre' },
+  { label: '👴 Padre',    value: 'Padre' },
+  { label: '👩 Hermana',  value: 'Hermana' },
+  { label: '🧑 Hermano',  value: 'Hermano' },
+  { label: '😊 Amiga',    value: 'Amiga' },
+  { label: '😊 Amigo',    value: 'Amigo' },
+  { label: '💌 Amor',     value: 'Amor' },
+  { label: '💌 Otro',     value: 'Otro' },
+];
+
 export default function CreateMessagePage() {
-  const router = useRouter();
+  const router       = useRouter();
+  const searchParams = useSearchParams();
+  const [prefilled, setPrefilled] = useState(false);
 
   const [form, setForm] = useState({
     parent_name:      '',
     parent_nickname:  '',
+    client_email:     '',
+    client_phone:     '',
     child_name:       '',
     nickname:         '',
-    email:            '',
-    phone:            '',
+    relationship:     'Hija',
+    recipient_email:  '',
+    recipient_phone:  '',
     delivery_date:    defaultDeliveryDate(),
     delivery_time:    '09:00',
-    tipo_mensaje:     'Cumpleaños',
+    tipo_mensaje:     'Birthday',
     message_text:     '',
   });
   const [errors, setErrors] = useState({});
@@ -57,6 +77,30 @@ export default function CreateMessagePage() {
     setForm((prev) => ({ ...prev, [field]: value }));
     if (errors[field]) setErrors((prev) => ({ ...prev, [field]: null }));
   };
+
+  useEffect(() => {
+    const recipientId = searchParams.get('recipientId');
+    if (!recipientId) return;
+    fetch(`/api/my-messages/${recipientId}`)
+      .then((r) => r.json())
+      .then(({ client, recipient }) => {
+        if (!client || !recipient) return;
+        setForm((prev) => ({
+          ...prev,
+          parent_name:     client.name,
+          parent_nickname: client.nickname  ?? '',
+          client_email:    client.email,
+          client_phone:    client.phone     ?? '',
+          child_name:      recipient.name,
+          nickname:        recipient.nickname    ?? '',
+          relationship:    recipient.relationship ?? 'Otro',
+          recipient_email: recipient.email  ?? '',
+          recipient_phone: recipient.phone  ?? '',
+        }));
+        setPrefilled(true);
+      })
+      .catch(() => {});
+  }, [searchParams]);
 
   const formatTime = (s) =>
     `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
@@ -113,11 +157,11 @@ export default function CreateMessagePage() {
 
   const validate = () => {
     const e = {};
-    if (!form.parent_name.trim()) e.parent_name = 'Tu nombre es requerido.';
-    if (!form.child_name.trim())  e.child_name  = 'El nombre del destinatario es requerido.';
-    if (!form.email.trim())       e.email       = 'El correo electrónico es requerido.';
-    else if (!/\S+@\S+\.\S+/.test(form.email)) e.email = 'Correo electrónico inválido.';
-    if (!form.delivery_date)      e.delivery_date = 'La fecha de entrega es requerida.';
+    if (!form.parent_name.trim())   e.parent_name   = 'Tu nombre es requerido.';
+    if (!form.client_email.trim())  e.client_email  = 'Tu correo electrónico es requerido.';
+    else if (!/\S+@\S+\.\S+/.test(form.client_email)) e.client_email = 'Correo inválido.';
+    if (!form.child_name.trim())    e.child_name    = 'El nombre del destinatario es requerido.';
+    if (!form.delivery_date)        e.delivery_date = 'La fecha de entrega es requerida.';
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -151,14 +195,18 @@ export default function CreateMessagePage() {
         body: JSON.stringify({
           parent_name:     form.parent_name,
           parent_nickname: form.parent_nickname || null,
+          client_email:    form.client_email,
+          client_phone:    form.client_phone || null,
           child_name:      form.child_name,
           nickname:        form.nickname || null,
-          email:         form.email,
-          phone:         form.phone || null,
+          relationship:    form.relationship || null,
+          recipient_email: form.recipient_email || null,
+          recipient_phone: form.recipient_phone || null,
+          tipo_mensaje:    form.tipo_mensaje,
           delivery_date,
           file_url,
           file_type,
-          message_text:  form.message_text || null,
+          message_text:    form.message_text || null,
         }),
       });
 
@@ -183,7 +231,17 @@ export default function CreateMessagePage() {
 
       <form onSubmit={handleSubmit} noValidate style={s.form}>
 
-        {/* 1. Remitente */}
+        {/* 1. Remitente — oculto cuando viene pre-llenado */}
+        {prefilled ? (
+          <div className="card" style={s.card}>
+            <p className="card-title">👤 Quién envía</p>
+            <div className="divider" />
+            <p style={s.prefilledRow}>
+              <strong>{form.parent_nickname || form.parent_name}</strong>
+              <span style={s.prefilledEmail}>{form.client_email}</span>
+            </p>
+          </div>
+        ) : (
         <div className="card" style={s.card}>
           <p className="card-title">👤 Quién envía</p>
           <div className="divider" />
@@ -203,9 +261,41 @@ export default function CreateMessagePage() {
               onChange={(e) => set('parent_nickname', e.target.value)}
             />
           </Field>
+          <Field label="Tu correo electrónico *" error={errors.client_email}>
+            <input
+              className={`field-input${errors.client_email ? ' error' : ''}`}
+              type="email"
+              inputMode="email"
+              placeholder="tucorreo@ejemplo.com"
+              value={form.client_email}
+              onChange={(e) => set('client_email', e.target.value)}
+              autoCapitalize="none"
+            />
+          </Field>
+          <Field label="Tu celular / WhatsApp (opcional)" error={null}>
+            <input
+              className="field-input"
+              type="tel"
+              inputMode="tel"
+              placeholder="+1 809 555 0000"
+              value={form.client_phone}
+              onChange={(e) => set('client_phone', e.target.value)}
+            />
+          </Field>
         </div>
+        )}
 
-        {/* 2. Destinatario */}
+        {/* 2. Destinatario — oculto cuando viene pre-llenado */}
+        {prefilled ? (
+          <div className="card" style={s.card}>
+            <p className="card-title">💌 Destinatario</p>
+            <div className="divider" />
+            <p style={s.prefilledRow}>
+              <strong>{form.nickname || form.child_name}</strong>
+              <span style={s.prefilledEmail}>{form.relationship}</span>
+            </p>
+          </div>
+        ) : (
         <div className="card" style={s.card}>
           <p className="card-title">💌 Datos del Destinatario</p>
           <div className="divider" />
@@ -225,14 +315,25 @@ export default function CreateMessagePage() {
               onChange={(e) => set('nickname', e.target.value)}
             />
           </Field>
-          <Field label="Correo electrónico *" error={errors.email}>
+          <Field label="Relación" error={null}>
+            <select
+              className="field-input"
+              value={form.relationship}
+              onChange={(e) => set('relationship', e.target.value)}
+            >
+              {RELATIONSHIPS.map(({ label, value }) => (
+                <option key={value} value={value}>{label}</option>
+              ))}
+            </select>
+          </Field>
+          <Field label="Correo electrónico (para entrega)" error={null}>
             <input
-              className={`field-input${errors.email ? ' error' : ''}`}
+              className="field-input"
               type="email"
               inputMode="email"
               placeholder="correo@ejemplo.com"
-              value={form.email}
-              onChange={(e) => set('email', e.target.value)}
+              value={form.recipient_email}
+              onChange={(e) => set('recipient_email', e.target.value)}
               autoCapitalize="none"
             />
           </Field>
@@ -242,11 +343,12 @@ export default function CreateMessagePage() {
               type="tel"
               inputMode="tel"
               placeholder="Ej: +1 809 555 0000"
-              value={form.phone}
-              onChange={(e) => set('phone', e.target.value)}
+              value={form.recipient_phone}
+              onChange={(e) => set('recipient_phone', e.target.value)}
             />
           </Field>
         </div>
+        )}
 
         {/* 3. Detalles del mensaje */}
         <div className="card" style={s.card}>
@@ -453,6 +555,11 @@ const s = {
     gap: 16,
   },
   card: { marginBottom: 0 },
+  prefilledRow: {
+    display: 'flex', flexDirection: 'column', gap: 2,
+    padding: '4px 0', margin: 0,
+  },
+  prefilledEmail: { fontSize: 13, color: '#7C3AED', fontWeight: 500 },
   select: { marginBottom: 16, cursor: 'pointer' },
   textarea: { resize: 'vertical', minHeight: 100, lineHeight: '1.5' },
 

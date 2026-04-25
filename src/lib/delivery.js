@@ -21,7 +21,6 @@ export async function runDailyDelivery() {
     console.log('[DELIVERY] No messages due today.');
     return { processed: 0 };
   }
-
   const results = await Promise.allSettled(due.map(sendDeliveryEmail));
   const processed = results.filter((r) => r.status === 'fulfilled').length;
   console.log(`[DELIVERY] Processed ${processed}/${due.length} messages.`);

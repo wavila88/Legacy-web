@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { getMessage } from '../../lib/repository/messageRepository';
+// getMessage now returns a joined row with parent_name, child_name, nickname, etc.
 import MediaPlayer from './MediaPlayer';
 
 export async function generateMetadata(id) {
@@ -86,8 +87,8 @@ export default async function ViewMessagePage({ id }) {
           </div>
         )}
 
-        <Link href={`/m/${id}/edit`} style={s.editLink}>
-          ✏️ Editar mensaje
+        <Link href="/my-messages" style={s.myMessagesBtn}>
+          💌 Ver mis mensajes
         </Link>
 
         <div style={{ height: 48 }} />
@@ -175,13 +176,16 @@ const s = {
     lineHeight: 1.7,
     whiteSpace: 'pre-wrap',
   },
-  editLink: {
+  myMessagesBtn: {
+    display: 'block',
     textAlign: 'center',
-    fontSize: 14,
-    color: '#7C3AED',
-    fontWeight: 600,
-    padding: 8,
-    textDecoration: 'underline',
+    padding: '14px 24px',
+    backgroundColor: '#7C3AED',
+    color: '#FFFFFF',
+    fontWeight: 700,
+    fontSize: 16,
+    borderRadius: 12,
+    textDecoration: 'none',
   },
   centered: {
     minHeight: '100dvh',
