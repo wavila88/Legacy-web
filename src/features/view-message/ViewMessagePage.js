@@ -1,6 +1,6 @@
-import Link from 'next/link';
+import { getTranslations, getLocale } from 'next-intl/server';
+import { Link } from '@/lib/navigation';
 import { getMessage } from '../../lib/repository/messageRepository';
-// getMessage now returns a joined row with parent_name, child_name, nickname, etc.
 import MediaPlayer from './MediaPlayer';
 
 export async function generateMetadata(id) {
@@ -13,6 +13,7 @@ export async function generateMetadata(id) {
 }
 
 export default async function ViewMessagePage({ id }) {
+  const [t, locale] = await Promise.all([getTranslations('view'), getLocale()]);
   const raw = await getMessage(id);
 
   // Convertir file_data (bytea) → base64 data URL para reproducir en browser
@@ -26,10 +27,10 @@ export default async function ViewMessagePage({ id }) {
     return (
       <div style={s.centered}>
         <div style={s.notFoundIcon}>🔒</div>
-        <h1 style={s.notFoundTitle}>Mensaje no encontrado</h1>
-        <p style={s.notFoundSub}>Este enlace no existe o ya expiró.</p>
+        <h1 style={s.notFoundTitle}>{t('notFound')}</h1>
+        <p style={s.notFoundSub}>{t('notFoundSub')}</p>
         <Link href="/" className="btn-primary" style={s.homeBtn}>
-          Ir al inicio
+          {t('goHome')}
         </Link>
       </div>
     );
@@ -38,16 +39,17 @@ export default async function ViewMessagePage({ id }) {
   const displayName  = message.nickname || message.child_name;
   const senderName   = message.parent_nickname || message.parent_name;
   const isVideo      = message.file_type === 'video';
-  const deliveryDate = new Date(message.delivery_date).toLocaleDateString('es-ES', {
-    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
-  });
+  const deliveryDate = new Date(message.delivery_date).toLocaleDateString(
+    locale === 'pt' ? 'pt-BR' : 'es-ES',
+    { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' },
+  );
 
   return (
     <div style={s.page}>
       <div style={s.header}>
         <div style={s.headerInner}>
           <div style={s.envelopeCircle}>💌</div>
-          <p style={s.from}>Un mensaje de</p>
+          <p style={s.from}>{t('from')}</p>
           <h1 style={s.senderName}>{senderName}</h1>
         </div>
       </div>
@@ -57,7 +59,7 @@ export default async function ViewMessagePage({ id }) {
           <div style={s.metaRow}>
             <span style={s.metaIcon}>🎁</span>
             <div>
-              <p style={s.metaLabel}>Para</p>
+              <p style={s.metaLabel}>{t('to')}</p>
               <p style={s.metaValue}>{displayName}</p>
             </div>
           </div>
@@ -65,7 +67,7 @@ export default async function ViewMessagePage({ id }) {
           <div style={s.metaRow}>
             <span style={s.metaIcon}>📅</span>
             <div>
-              <p style={s.metaLabel}>Fecha de entrega</p>
+              <p style={s.metaLabel}>{t('deliveryDate')}</p>
               <p style={s.metaValue}>{deliveryDate}</p>
             </div>
           </div>
@@ -73,7 +75,7 @@ export default async function ViewMessagePage({ id }) {
 
         {message.file_url && (
           <div className="card">
-            <p style={s.cardTitle}>{isVideo ? '🎥 Video' : '🎙 Mensaje de voz'}</p>
+            <p style={s.cardTitle}>{isVideo ? t('video') : t('audio')}</p>
             <div className="divider" />
             <MediaPlayer url={message.file_url} isVideo={isVideo} />
           </div>
@@ -81,14 +83,14 @@ export default async function ViewMessagePage({ id }) {
 
         {message.message_text && (
           <div className="card">
-            <p style={s.cardTitle}>✍️ Mensaje</p>
+            <p style={s.cardTitle}>{t('text')}</p>
             <div className="divider" />
             <p style={s.messageText}>{message.message_text}</p>
           </div>
         )}
 
         <Link href="/my-messages" style={s.myMessagesBtn}>
-          💌 Ver mis mensajes
+          {t('myMessages')}
         </Link>
 
         <div style={{ height: 48 }} />

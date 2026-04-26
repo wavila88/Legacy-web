@@ -1,6 +1,8 @@
-import Link from 'next/link';
+import { useTranslations } from 'next-intl';
+import { Link } from '@/lib/navigation';
 
 export default function HomePage() {
+  const t = useTranslations('home');
   return (
     <div style={styles.container}>
         <img
@@ -15,28 +17,27 @@ export default function HomePage() {
 
         <div style={styles.content}>
           <div style={styles.bottom}>
-            <p style={styles.tagline}>Un regalo que trasciende el tiempo</p>
+            <p style={styles.tagline}>{t('tagline')}</p>
 
-            <h1 style={styles.title}>Legado</h1>
-            <h1 style={styles.titleAccent}>Mensajes</h1>
+            <h1 style={styles.title}>{t('title')}</h1>
+            <h1 style={styles.titleAccent}>{t('titleAccent')}</h1>
 
             <p style={styles.description}>
-              Deja tu amor, tu sabiduría y tu voz<br />
-              para las personas que más quieres.
+              {t('description').split('\n').map((line, i) => (
+                <span key={i}>{line}{i === 0 && <br />}</span>
+              ))}
             </p>
 
             <Link href="/create" style={styles.cta}>
-              Crear un Mensaje
+              {t('cta')}
               <span style={styles.ctaArrow}>&#8594;</span>
             </Link>
 
             <Link href="/my-messages" style={styles.ctaSecondary}>
-              💌 Ver mis mensajes
+              {t('ctaSecondary')}
             </Link>
 
-            <p style={styles.disclaimer}>
-              Tus mensajes se entregan únicamente en la fecha que elijas.
-            </p>
+            <p style={styles.disclaimer}>{t('disclaimer')}</p>
           </div>
         </div>
       </div>

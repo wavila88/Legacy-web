@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { useAudioRecorder } from '../hooks/useAudioRecorder';
 import { formatTime } from '../utils/dateUtils';
 
@@ -16,26 +17,20 @@ function WaveBars({ color }) {
 }
 
 export default function AudioRecorder({ onRecordingChange }) {
+  const t = useTranslations('create');
   const { recording, audioBlob, audioURL, recSeconds, start, stop, clear } = useAudioRecorder();
 
   const handleStart = async () => {
-    await start();
-    onRecordingChange?.(null);
+    try {
+      await start();
+      onRecordingChange?.(null);
+    } catch {
+      alert(t('micError'));
+    }
   };
 
-  const handleStop = () => {
-    stop();
-  };
-
-  const handleClear = () => {
-    clear();
-    onRecordingChange?.(null);
-  };
-
-  // Notify parent when blob is available
-  if (audioBlob && onRecordingChange) {
-    // Use effect-like pattern via render — parent should use useEffect or callback
-  }
+  const handleStop = () => { stop(); };
+  const handleClear = () => { clear(); onRecordingChange?.(null); };
 
   return (
     <div style={s.recorderBox}>
@@ -60,96 +55,36 @@ export default function AudioRecorder({ onRecordingChange }) {
             {recording ? '⏹' : '🎙'}
           </button>
           <p style={s.micHint}>
-            {recording ? 'Toca para detener la grabación' : 'Toca el micrófono para grabar tu voz'}
+            {recording ? t('recordStop') : t('recordStart')}
           </p>
           {recording && <WaveBars color="#DC2626" />}
         </div>
       )}
-      {audioURL && <p style={s.savedLabel}>✓ Mensaje de voz guardado</p>}
+      {audioURL && <p style={s.savedLabel}>{t('voiceSaved')}</p>}
     </div>
   );
 }
 
 const s = {
   recorderBox: {
-    marginTop: 16,
-    border: '1px solid #D8B4FE',
-    borderRadius: 12,
-    backgroundColor: '#F5F3FF',
-    padding: 16,
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 8,
+    marginTop: 16, border: '1px solid #D8B4FE', borderRadius: 12,
+    backgroundColor: '#F5F3FF', padding: 16, display: 'flex',
+    flexDirection: 'column', gap: 8,
   },
-  timerRow: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-  },
-  redDot: {
-    width: 10,
-    height: 10,
-    borderRadius: '50%',
-    backgroundColor: '#DC2626',
-    display: 'inline-block',
-  },
-  timerText: {
-    fontSize: 20,
-    fontWeight: 700,
-    color: '#DC2626',
-    fontVariantNumeric: 'tabular-nums',
-  },
-  micRow: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    gap: 10,
-  },
+  timerRow: { display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 },
+  redDot: { width: 10, height: 10, borderRadius: '50%', backgroundColor: '#DC2626', display: 'inline-block' },
+  timerText: { fontSize: 20, fontWeight: 700, color: '#DC2626', fontVariantNumeric: 'tabular-nums' },
+  micRow: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 },
   micBtn: {
-    width: 72,
-    height: 72,
-    borderRadius: '50%',
-    backgroundColor: '#FFFFFF',
-    border: '2px solid #7C3AED',
-    fontSize: 30,
-    cursor: 'pointer',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    boxShadow: '0 4px 12px rgba(124,58,237,0.25)',
-    transition: 'background 0.15s, border-color 0.15s',
+    width: 72, height: 72, borderRadius: '50%', backgroundColor: '#FFFFFF',
+    border: '2px solid #7C3AED', fontSize: 30, cursor: 'pointer',
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
+    boxShadow: '0 4px 12px rgba(124,58,237,0.25)', transition: 'background 0.15s, border-color 0.15s',
   },
-  micBtnRecording: {
-    backgroundColor: '#FEE2E2',
-    borderColor: '#DC2626',
-  },
-  micHint: {
-    fontSize: 13,
-    color: '#6B7280',
-    textAlign: 'center',
-  },
-  playbackRow: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: 8,
-  },
-  audioPlayer: {
-    flex: 1,
-    height: 40,
-    accentColor: '#7C3AED',
-  },
-  deleteBtn: {
-    background: 'none',
-    border: 'none',
-    fontSize: 20,
-    cursor: 'pointer',
-    padding: 4,
-  },
-  savedLabel: {
-    fontSize: 13,
-    color: '#059669',
-    fontWeight: 600,
-    textAlign: 'center',
-  },
+  micBtnRecording: { backgroundColor: '#FEE2E2', borderColor: '#DC2626' },
+  micHint: { fontSize: 13, color: '#6B7280', textAlign: 'center' },
+  playbackRow: { display: 'flex', alignItems: 'center', gap: 8 },
+  audioPlayer: { flex: 1, height: 40, accentColor: '#7C3AED' },
+  deleteBtn: { background: 'none', border: 'none', fontSize: 20, cursor: 'pointer', padding: 4 },
+  savedLabel: { fontSize: 13, color: '#059669', fontWeight: 600, textAlign: 'center' },
 };

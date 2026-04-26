@@ -1,12 +1,15 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { useRouter, useSearchParams } from 'next/navigation';
 import VideoUploader from './components/VideoUploader';
 import { uploadFile } from './services/uploadService';
 import { minDeliveryDate, defaultDeliveryDate } from './utils/dateUtils';
 
-/** Converts a Blob to a base64 data URL so it can be stored and played without external storage. */
+const RELATIONSHIP_VALUES = ['Hija','Hijo','Esposa','Esposo','Madre','Padre','Hermana','Hermano','Amiga','Amigo','Amor','Otro'];
+const TIPO_VALUES         = ['Birthday','Wedding','Anniversary','General'];
+
 function blobToDataURL(blob) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -16,29 +19,10 @@ function blobToDataURL(blob) {
   });
 }
 
-const TIPOS_MENSAJE = [
-  { etiqueta: '🎂  Birthday',    valor: 'Birthday' },
-  { etiqueta: '💍  Wedding',     valor: 'Wedding' },
-  { etiqueta: '🎊  Anniversary', valor: 'Anniversary' },
-  { etiqueta: '💌  General',     valor: 'General' },
-];
-
-const RELATIONSHIPS = [
-  { label: '👧 Hija',     value: 'Hija' },
-  { label: '👦 Hijo',     value: 'Hijo' },
-  { label: '💑 Esposa',   value: 'Esposa' },
-  { label: '👨 Esposo',   value: 'Esposo' },
-  { label: '👵 Madre',    value: 'Madre' },
-  { label: '👴 Padre',    value: 'Padre' },
-  { label: '👩 Hermana',  value: 'Hermana' },
-  { label: '🧑 Hermano',  value: 'Hermano' },
-  { label: '😊 Amiga',    value: 'Amiga' },
-  { label: '😊 Amigo',    value: 'Amigo' },
-  { label: '💌 Amor',     value: 'Amor' },
-  { label: '💌 Otro',     value: 'Otro' },
-];
-
 export default function CreateMessagePage() {
+  const t            = useTranslations('create');
+  const tr           = useTranslations('relationships');
+  const tt           = useTranslations('tipos');
   const router       = useRouter();
   const searchParams = useSearchParams();
   const [prefilled, setPrefilled] = useState(false);
@@ -138,7 +122,7 @@ export default function CreateMessagePage() {
       setRecSeconds(0);
       timerRef.current = setInterval(() => setRecSeconds((s) => s + 1), 1000);
     } catch {
-      alert('No se pudo acceder al micrófono. Verifica los permisos del navegador.');
+      alert(t('micError'));
     }
   };
 
@@ -157,11 +141,11 @@ export default function CreateMessagePage() {
 
   const validate = () => {
     const e = {};
-    if (!form.parent_name.trim())   e.parent_name   = 'Tu nombre es requerido.';
-    if (!form.client_email.trim())  e.client_email  = 'Tu correo electrónico es requerido.';
-    else if (!/\S+@\S+\.\S+/.test(form.client_email)) e.client_email = 'Correo inválido.';
-    if (!form.child_name.trim())    e.child_name    = 'El nombre del destinatario es requerido.';
-    if (!form.delivery_date)        e.delivery_date = 'La fecha de entrega es requerida.';
+    if (!form.parent_name.trim())   e.parent_name   = t('errorParentName');
+    if (!form.client_email.trim())  e.client_email  = t('errorEmail');
+    else if (!/\S+@\S+\.\S+/.test(form.client_email)) e.client_email = t('errorEmailInvalid');
+    if (!form.child_name.trim())    e.child_name    = t('errorChildName');
+    if (!form.delivery_date)        e.delivery_date = t('errorDate');
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -211,7 +195,7 @@ export default function CreateMessagePage() {
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? 'Error al guardar el mensaje.');
+      if (!res.ok) throw new Error(data.error ?? t('errorSave'));
 
       router.push(`/success?id=${data.id}`);
     } catch (err) {
@@ -224,8 +208,8 @@ export default function CreateMessagePage() {
   return (
     <div style={s.page}>
       <div style={s.topbar}>
-        <button style={s.backBtn} onClick={() => router.push('/')}>← Volver</button>
-        <span style={s.topbarTitle}>Crear Mensaje</span>
+        <button style={s.backBtn} onClick={() => router.push('/')}>{t('back')}</button>
+        <span style={s.topbarTitle}>{t('title')}</span>
         <span style={{ width: 72 }} />
       </div>
 
@@ -234,7 +218,7 @@ export default function CreateMessagePage() {
         {/* 1. Remitente — oculto cuando viene pre-llenado */}
         {prefilled ? (
           <div className="card" style={s.card}>
-            <p className="card-title">👤 Quién envía</p>
+            <p className="card-title">{t('senderSection')}</p>
             <div className="divider" />
             <p style={s.prefilledRow}>
               <strong>{form.parent_nickname || form.parent_name}</strong>
@@ -243,41 +227,41 @@ export default function CreateMessagePage() {
           </div>
         ) : (
         <div className="card" style={s.card}>
-          <p className="card-title">👤 Quién envía</p>
+          <p className="card-title">{t('senderSection')}</p>
           <div className="divider" />
-          <Field label="Tu nombre *" error={errors.parent_name}>
+          <Field label={t('senderName')} error={errors.parent_name}>
             <input
               className={`field-input${errors.parent_name ? ' error' : ''}`}
-              placeholder="Ej: María García"
+              placeholder={t('senderNamePlaceholder')}
               value={form.parent_name}
               onChange={(e) => set('parent_name', e.target.value)}
             />
           </Field>
-          <Field label="¿Cómo te conocen? (opcional)" error={null}>
+          <Field label={t('senderNickname')} error={null}>
             <input
               className="field-input"
-              placeholder="Ej: Mamá, Papá, Abuelo, Tía Lucía…"
+              placeholder={t('senderNicknamePlaceholder')}
               value={form.parent_nickname}
               onChange={(e) => set('parent_nickname', e.target.value)}
             />
           </Field>
-          <Field label="Tu correo electrónico *" error={errors.client_email}>
+          <Field label={t('senderEmail')} error={errors.client_email}>
             <input
               className={`field-input${errors.client_email ? ' error' : ''}`}
               type="email"
               inputMode="email"
-              placeholder="tucorreo@ejemplo.com"
+              placeholder={t('senderEmailPlaceholder')}
               value={form.client_email}
               onChange={(e) => set('client_email', e.target.value)}
               autoCapitalize="none"
             />
           </Field>
-          <Field label="Tu celular / WhatsApp (opcional)" error={null}>
+          <Field label={t('senderPhone')} error={null}>
             <input
               className="field-input"
               type="tel"
               inputMode="tel"
-              placeholder="+1 809 555 0000"
+              placeholder={t('senderPhonePlaceholder')}
               value={form.client_phone}
               onChange={(e) => set('client_phone', e.target.value)}
             />
@@ -288,7 +272,7 @@ export default function CreateMessagePage() {
         {/* 2. Destinatario — oculto cuando viene pre-llenado */}
         {prefilled ? (
           <div className="card" style={s.card}>
-            <p className="card-title">💌 Destinatario</p>
+            <p className="card-title">{t('recipientLabel')}</p>
             <div className="divider" />
             <p style={s.prefilledRow}>
               <strong>{form.nickname || form.child_name}</strong>
@@ -297,52 +281,52 @@ export default function CreateMessagePage() {
           </div>
         ) : (
         <div className="card" style={s.card}>
-          <p className="card-title">💌 Datos del Destinatario</p>
+          <p className="card-title">{t('recipientSection')}</p>
           <div className="divider" />
-          <Field label="Nombre completo *" error={errors.child_name}>
+          <Field label={t('recipientName')} error={errors.child_name}>
             <input
               className={`field-input${errors.child_name ? ' error' : ''}`}
-              placeholder="Ej: Sofía García"
+              placeholder={t('recipientNamePlaceholder')}
               value={form.child_name}
               onChange={(e) => set('child_name', e.target.value)}
             />
           </Field>
-          <Field label="Nombre de cariño o apodo" error={null}>
+          <Field label={t('recipientNickname')} error={null}>
             <input
               className="field-input"
-              placeholder="Ej: mi amor, princesa, papá…"
+              placeholder={t('recipientNicknamePlaceholder')}
               value={form.nickname}
               onChange={(e) => set('nickname', e.target.value)}
             />
           </Field>
-          <Field label="Relación" error={null}>
+          <Field label={t('recipientRelationship')} error={null}>
             <select
               className="field-input"
               value={form.relationship}
               onChange={(e) => set('relationship', e.target.value)}
             >
-              {RELATIONSHIPS.map(({ label, value }) => (
-                <option key={value} value={value}>{label}</option>
+              {RELATIONSHIP_VALUES.map((v) => (
+                <option key={v} value={v}>{tr(v)}</option>
               ))}
             </select>
           </Field>
-          <Field label="Correo electrónico (para entrega)" error={null}>
+          <Field label={t('recipientEmail')} error={null}>
             <input
               className="field-input"
               type="email"
               inputMode="email"
-              placeholder="correo@ejemplo.com"
+              placeholder={t('recipientEmailPlaceholder')}
               value={form.recipient_email}
               onChange={(e) => set('recipient_email', e.target.value)}
               autoCapitalize="none"
             />
           </Field>
-          <Field label="Celular / WhatsApp (opcional)" error={null}>
+          <Field label={t('recipientPhone')} error={null}>
             <input
               className="field-input"
               type="tel"
               inputMode="tel"
-              placeholder="Ej: +1 809 555 0000"
+              placeholder={t('recipientPhonePlaceholder')}
               value={form.recipient_phone}
               onChange={(e) => set('recipient_phone', e.target.value)}
             />
@@ -352,23 +336,23 @@ export default function CreateMessagePage() {
 
         {/* 3. Detalles del mensaje */}
         <div className="card" style={s.card}>
-          <p className="card-title">📝 Detalles del Mensaje</p>
+          <p className="card-title">{t('detailsSection')}</p>
           <div className="divider" />
 
-          <label className="field-label">Tipo de mensaje</label>
+          <label className="field-label">{t('messageType')}</label>
           <select
             className="field-input"
             style={s.select}
             value={form.tipo_mensaje}
             onChange={(e) => set('tipo_mensaje', e.target.value)}
           >
-            {TIPOS_MENSAJE.map(({ etiqueta, valor }) => (
-              <option key={valor} value={valor}>{etiqueta}</option>
+            {TIPO_VALUES.map((v) => (
+              <option key={v} value={v}>{tt(v)}</option>
             ))}
           </select>
 
           <div style={s.dateTimeRow}>
-            <Field label="Fecha de entrega *" error={errors.delivery_date} style={{ flex: 1 }}>
+            <Field label={t('deliveryDate')} error={errors.delivery_date} style={{ flex: 1 }}>
               <input
                 className={`field-input${errors.delivery_date ? ' error' : ''}`}
                 type="date"
@@ -377,7 +361,7 @@ export default function CreateMessagePage() {
                 onChange={(e) => set('delivery_date', e.target.value)}
               />
             </Field>
-            <Field label="Hora de entrega" error={null} style={{ flex: 1 }}>
+            <Field label={t('deliveryTime')} error={null} style={{ flex: 1 }}>
               <input
                 className="field-input"
                 type="time"
@@ -392,8 +376,8 @@ export default function CreateMessagePage() {
         <div className="card" style={s.card}>
           <button type="button" style={s.msgToggle} onClick={() => setMsgOpen((o) => !o)}>
             <span style={s.msgToggleLeft}>
-              <span style={s.cardTitleInline}>✍️ Mensaje</span>
-              <span style={s.msgToggleSub}>Opcional</span>
+              <span style={s.cardTitleInline}>{t('textSection')}</span>
+              <span style={s.msgToggleSub}>{t('textOptional')}</span>
             </span>
             <span style={s.msgChevron}>{msgOpen ? '▲' : '▼'}</span>
           </button>
@@ -404,7 +388,7 @@ export default function CreateMessagePage() {
               <textarea
                 className="field-input"
                 style={s.textarea}
-                placeholder="Escribe aquí lo que quieres decirle…"
+                placeholder={t('textPlaceholder')}
                 rows={4}
                 value={form.message_text}
                 onChange={(e) => set('message_text', e.target.value)}
@@ -416,8 +400,8 @@ export default function CreateMessagePage() {
 
         {/* 5. Adjunto */}
         <div className="card" style={s.card}>
-          <p className="card-title">📎 Adjunto</p>
-          <p className="card-subtitle">Elige un tipo de adjunto (opcional)</p>
+          <p className="card-title">{t('attachSection')}</p>
+          <p className="card-subtitle">{t('attachSub')}</p>
           <div className="divider" />
 
           <div style={s.segmented}>
@@ -426,14 +410,14 @@ export default function CreateMessagePage() {
               style={{ ...s.segment, ...(attachType === 'audio' ? s.segmentActive : {}) }}
               onClick={() => switchAttachType('audio')}
             >
-              🎙 Mensaje de voz
+              {t('audioBtn')}
             </button>
             <button
               type="button"
               style={{ ...s.segment, ...(attachType === 'video' ? s.segmentActive : {}) }}
               onClick={() => switchAttachType('video')}
             >
-              🎥 Video
+              {t('videoBtn')}
             </button>
           </div>
 
@@ -460,12 +444,12 @@ export default function CreateMessagePage() {
                     {recording ? '⏹' : '🎙'}
                   </button>
                   <p style={s.micHint}>
-                    {recording ? 'Toca para detener la grabación' : 'Toca el micrófono para grabar tu voz'}
+                    {recording ? t('recordStop') : t('recordStart')}
                   </p>
                   {recording && <WaveBars />}
                 </div>
               )}
-              {audioURL && <p style={s.savedLabel}>✓ Mensaje de voz guardado</p>}
+              {audioURL && <p style={s.savedLabel}>{t('voiceSaved')}</p>}
             </div>
           )}
 
@@ -474,12 +458,12 @@ export default function CreateMessagePage() {
           )}
 
           {attachType === null && (
-            <p style={s.noSelection}>Toca una opción de arriba para agregar un adjunto</p>
+            <p style={s.noSelection}>{t('noSelection')}</p>
           )}
         </div>
 
         <button type="submit" className="btn-primary" disabled={submitting}>
-          {submitting ? 'Guardando…' : '💾  Guardar Mensaje'}
+          {submitting ? t('submitting') : t('submit')}
         </button>
 
         <div style={{ height: 48 }} />

@@ -31,7 +31,7 @@ export function useAudioRecorder() {
       setRecSeconds(0);
       timerRef.current = setInterval(() => setRecSeconds((s) => s + 1), 1000);
     } catch {
-      alert('No se pudo acceder al micrófono. Verifica los permisos del navegador.');
+      throw new Error('mic_permission_denied');
     }
   };
 

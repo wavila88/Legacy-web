@@ -1,11 +1,13 @@
 'use client';
 
 import { useEffect, useState, Suspense } from 'react';
+import { useTranslations } from 'next-intl';
 import { useSearchParams, useRouter } from 'next/navigation';
-import Link from 'next/link';
+import { Link } from '@/lib/navigation';
 import { formatDate } from '../create-message/utils/dateUtils';
 
 function SuccessContent() {
+  const t       = useTranslations('success');
   const params  = useSearchParams();
   const router  = useRouter();
   const id      = params.get('id');
@@ -48,9 +50,9 @@ function SuccessContent() {
   if (error) {
     return (
       <div style={s.centered}>
-        <p style={s.errorText}>No se encontró el mensaje.</p>
+        <p style={s.errorText}>{t('notFound')}</p>
         <Link href="/create" className="btn-primary" style={{ marginTop: 24, display: 'inline-flex', width: 'auto', paddingLeft: 32, paddingRight: 32 }}>
-          Crear uno nuevo
+          {t('createNew')}
         </Link>
       </div>
     );
@@ -62,8 +64,8 @@ function SuccessContent() {
     <div style={s.page}>
       <div style={s.hero}>
         <div style={s.heartCircle}>❤️</div>
-        <h1 style={s.heroTitle}>Tu mensaje está guardado</h1>
-        <p style={s.heroSub}>Lo haremos llegar exactamente cuando lo elegiste.</p>
+        <h1 style={s.heroTitle}>{t('heroTitle')}</h1>
+        <p style={s.heroSub}>{t('heroSub')}</p>
       </div>
 
       <div style={s.body}>
@@ -71,7 +73,7 @@ function SuccessContent() {
           <div style={s.summaryRow}>
             <span style={s.summaryIcon}>👤</span>
             <div>
-              <p style={s.summaryLabel}>De</p>
+              <p style={s.summaryLabel}>{t('de')}</p>
               <p style={s.summaryValue}>{message.parent_name}</p>
             </div>
           </div>
@@ -79,7 +81,7 @@ function SuccessContent() {
           <div style={s.summaryRow}>
             <span style={s.summaryIcon}>💌</span>
             <div>
-              <p style={s.summaryLabel}>Para</p>
+              <p style={s.summaryLabel}>{t('to')}</p>
               <p style={s.summaryValue}>{displayName}</p>
             </div>
           </div>
@@ -87,29 +89,29 @@ function SuccessContent() {
           <div style={s.summaryRow}>
             <span style={s.summaryIcon}>📅</span>
             <div>
-              <p style={s.summaryLabel}>Se entregará el</p>
+              <p style={s.summaryLabel}>{t('deliveryDate')}</p>
               <p style={s.summaryValue}>{formatDate(message.delivery_date)}</p>
             </div>
           </div>
         </div>
 
         <div className="card" style={s.linkCard}>
-          <p style={s.linkTitle}>🔗 Enlace privado del mensaje</p>
-          <p style={s.linkHint}>Guarda este enlace. Solo quien lo tenga podrá ver el mensaje.</p>
+          <p style={s.linkTitle}>{t('linkTitle')}</p>
+          <p style={s.linkHint}>{t('linkHint')}</p>
           <div style={s.linkBox}>
             <span style={s.linkText}>/m/{id}</span>
           </div>
           <button style={s.copyBtn} onClick={copyLink}>
-            {copied ? '✓ ¡Copiado!' : '📋 Copiar enlace'}
+            {copied ? t('copied') : t('copy')}
           </button>
         </div>
 
         <Link href={`/m/${id}`} className="btn-primary">
-          👁️&nbsp;&nbsp;Ver mi mensaje
+          {t('viewMessage')}
         </Link>
 
         <Link href="/create" style={s.anotherLink}>
-          Crear otro mensaje
+          {t('another')}
         </Link>
 
         <div style={{ height: 48 }} />

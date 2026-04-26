@@ -18,9 +18,13 @@ export async function getMessage(id) {
       file_data:       messages.file_data,
       message_text:    messages.message_text,
       delivered:       messages.delivered,
+      status:          messages.status,
+      payment_id:      messages.payment_id,
+      payment_amount:  messages.payment_amount,
       created_at:      messages.created_at,
       parent_name:     clients.name,
       parent_nickname: clients.nickname,
+      client_email:    clients.email,
       child_name:      recipients.name,
       nickname:        recipients.nickname,
       relationship:    recipients.relationship,
@@ -37,17 +41,37 @@ export async function getMessage(id) {
 export async function getMessagesByRecipient(recipient_id) {
   return db
     .select({
-      id:            messages.id,
-      tipo_mensaje:  messages.tipo_mensaje,
-      delivery_date: messages.delivery_date,
-      file_type:     messages.file_type,
-      message_text:  messages.message_text,
-      delivered:     messages.delivered,
-      created_at:    messages.created_at,
+      id:             messages.id,
+      tipo_mensaje:   messages.tipo_mensaje,
+      delivery_date:  messages.delivery_date,
+      file_type:      messages.file_type,
+      message_text:   messages.message_text,
+      delivered:      messages.delivered,
+      status:         messages.status,
+      payment_id:     messages.payment_id,
+      created_at:     messages.created_at,
     })
     .from(messages)
     .where(eq(messages.recipient_id, recipient_id))
     .orderBy(messages.delivery_date);
+}
+
+export async function updateMessagePayment(id, { status, payment_id, payment_amount }) {
+  const [updated] = await db
+    .update(messages)
+    .set({ status, payment_id, payment_amount: String(payment_amount) })
+    .where(eq(messages.id, id))
+    .returning();
+  return updated;
+}
+
+export async function getMessageByPaymentId(payment_id) {
+  const [row] = await db
+    .select({ id: messages.id, status: messages.status })
+    .from(messages)
+    .where(eq(messages.payment_id, payment_id))
+    .limit(1);
+  return row ?? null;
 }
 
 export async function findMessagesDueToday() {

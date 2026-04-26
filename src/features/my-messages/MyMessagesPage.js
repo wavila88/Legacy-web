@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 const RELATIONSHIP_EMOJI = {
@@ -12,6 +13,7 @@ const RELATIONSHIP_EMOJI = {
 const STORAGE_KEY = 'legado_client_email';
 
 export default function MyMessagesPage() {
+  const t            = useTranslations('myMessages');
   const router       = useRouter();
   const searchParams = useSearchParams();
 
@@ -26,7 +28,7 @@ export default function MyMessagesPage() {
     const urlError = searchParams.get('error');
 
     if (urlError) {
-      setErrMsg(urlError === 'expired' ? 'El link expiró. Solicita uno nuevo.' : 'Link inválido.');
+      setErrMsg(urlError === 'expired' ? t('errorExpired') : t('errorInvalid'));
       setStage('error');
       return;
     }
@@ -44,7 +46,7 @@ export default function MyMessagesPage() {
       const res  = await fetch(`/api/my-messages?email=${encodeURIComponent(emailToLoad)}`);
       const json = await res.json();
       if (!res.ok) {
-        setErrMsg(json.error || 'No se encontró tu cuenta.');
+        setErrMsg(json.error || t('errorInvalid'));
         setStage('error');
       } else {
         localStorage.setItem(STORAGE_KEY, emailToLoad);
@@ -52,7 +54,7 @@ export default function MyMessagesPage() {
         setStage('ready');
       }
     } catch {
-      setErrMsg('Error de conexión. Intenta de nuevo.');
+      setErrMsg(t('errorInvalid'));
       setStage('error');
     }
   };
@@ -72,11 +74,11 @@ export default function MyMessagesPage() {
         setStage('sent');
       } else {
         const json = await res.json();
-        setErrMsg(json.error || 'No se pudo enviar el correo.');
+        setErrMsg(json.error || t('errorInvalid'));
         setStage('error');
       }
     } catch {
-      setErrMsg('Error de conexión. Intenta de nuevo.');
+      setErrMsg(t('errorInvalid'));
       setStage('error');
     }
   };
@@ -94,8 +96,8 @@ export default function MyMessagesPage() {
       <div style={s.header}>
         <div style={s.headerInner}>
           <div style={s.iconCircle}>💌</div>
-          <h1 style={s.title}>Mis Mensajes</h1>
-          <p style={s.subtitle}>Ve los mensajes que has guardado para cada persona especial</p>
+          <h1 style={s.title}>{t('title')}</h1>
+          <p style={s.subtitle}>{t('subtitle')}</p>
         </div>
       </div>
 
@@ -104,12 +106,12 @@ export default function MyMessagesPage() {
         {/* STAGE: idle o error — mostrar formulario */}
         {(stage === 'idle' || stage === 'error') && (
           <form onSubmit={handleSendLink} style={s.card}>
-            <p style={s.cardTitle}>Ingresa tu correo</p>
-            <p style={s.cardSub}>Te enviaremos un link seguro para acceder a tus mensajes.</p>
+            <p style={s.cardTitle}>{t('emailTitle')}</p>
+            <p style={s.cardSub}>{t('emailSub')}</p>
             <input
               style={s.input}
               type="email"
-              placeholder="correo@ejemplo.com"
+              placeholder={t('emailPlaceholder')}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               autoCapitalize="none"
@@ -117,7 +119,7 @@ export default function MyMessagesPage() {
             />
             {errMsg && <p style={s.errorMsg}>{errMsg}</p>}
             <button type="submit" style={s.btn}>
-              Enviar link de acceso
+              {t('sendLink')}
             </button>
           </form>
         )}
@@ -125,7 +127,7 @@ export default function MyMessagesPage() {
         {/* STAGE: sending */}
         {stage === 'sending' && (
           <div style={s.infoCard}>
-            <p style={s.infoText}>Enviando correo…</p>
+            <p style={s.infoText}>{t('sending')}</p>
           </div>
         )}
 
@@ -133,13 +135,10 @@ export default function MyMessagesPage() {
         {stage === 'sent' && (
           <div style={s.infoCard}>
             <div style={s.sentIcon}>📬</div>
-            <p style={s.infoTitle}>Revisa tu correo</p>
-            <p style={s.infoText}>
-              Enviamos un link a <strong>{email}</strong>.<br />
-              Haz clic en él para ver tus mensajes. Expira en 1 hora.
-            </p>
+            <p style={s.infoTitle}>{t('sentTitle')}</p>
+            <p style={s.infoText}>{t('sentText', { email })}</p>
             <button style={s.linkBtn} onClick={() => { setStage('idle'); setErrMsg(''); }}>
-              Usar otro correo
+              {t('useOtherEmail')}
             </button>
           </div>
         )}
@@ -147,22 +146,20 @@ export default function MyMessagesPage() {
         {/* STAGE: loading */}
         {stage === 'loading' && (
           <div style={s.infoCard}>
-            <p style={s.infoText}>Cargando tus mensajes…</p>
+            <p style={s.infoText}>{t('loading')}</p>
           </div>
         )}
 
         {/* STAGE: ready — mostrar destinatarios */}
         {stage === 'ready' && data && (
           <>
-            <p style={s.greeting}>
-              Hola, <strong>{data.client.nickname || data.client.name}</strong> 👋
-            </p>
+            <p style={s.greeting}>{t('greeting', { name: data.client.nickname || data.client.name })}</p>
 
             {data.recipients.length === 0 ? (
               <div style={s.emptyBox}>
-                <p style={s.emptyText}>Aún no tienes mensajes guardados.</p>
+                <p style={s.emptyText}>{t('emptyText')}</p>
                 <button style={s.btn} onClick={() => router.push('/create')}>
-                  + Crear primer mensaje
+                  {t('createFirst')}
                 </button>
               </div>
             ) : (
@@ -182,19 +179,19 @@ export default function MyMessagesPage() {
                       {r.relationship && <p style={s.cardRel}>{r.relationship}</p>}
                       <p style={s.cardCount}>
                         {r.message_count}{' '}
-                        {Number(r.message_count) === 1 ? 'mensaje' : 'mensajes'}
+                        {Number(r.message_count) === 1 ? t('messageOne') : t('messageOther')}
                       </p>
                     </button>
                   ))}
                 </div>
                 <button style={s.btn} onClick={() => router.push('/create')}>
-                  + Nuevo mensaje
+                  {t('newMessage')}
                 </button>
               </>
             )}
 
             <button style={s.logoutBtn} onClick={handleLogout}>
-              Cerrar sesión
+              {t('logout')}
             </button>
           </>
         )}

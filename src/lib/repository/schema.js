@@ -1,4 +1,4 @@
-import { pgTable, text, boolean, timestamp, customType } from 'drizzle-orm/pg-core';
+import { pgTable, text, boolean, timestamp, numeric, customType } from 'drizzle-orm/pg-core';
 
 const bytea = customType({
   dataType: () => 'bytea',
@@ -43,6 +43,9 @@ export const messages = pgTable('messages', {
   file_type:     text('file_type'),
   file_data:     bytea('file_data'),
   message_text:  text('message_text'),
-  delivered:     boolean('delivered').default(false).notNull(),
-  created_at:    timestamp('created_at').defaultNow().notNull(),
+  delivered:       boolean('delivered').default(false).notNull(),
+  status:          text('status').default('draft').notNull(),
+  payment_id:      text('payment_id'),
+  payment_amount:  numeric('payment_amount', { precision: 10, scale: 2 }),
+  created_at:      timestamp('created_at').defaultNow().notNull(),
 });

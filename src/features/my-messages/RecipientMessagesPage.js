@@ -1,4 +1,5 @@
-import Link from 'next/link';
+import { getTranslations, getLocale } from 'next-intl/server';
+import { Link } from '@/lib/navigation';
 import { getRecipient } from '../../lib/repository/recipientRepository';
 import { getMessagesByRecipient } from '../../lib/repository/messageRepository';
 
@@ -15,16 +16,9 @@ const TIPO_EMOJI = {
   General:     '💌',
 };
 
-const TIPO_LABEL = {
-  Birthday:    'Cumpleaños',
-  Wedding:     'Boda',
-  Anniversary: 'Aniversario',
-  General:     'General',
-};
-
-function formatDate(dateStr) {
+function formatDate(dateStr, locale) {
   try {
-    return new Date(dateStr).toLocaleDateString('es-ES', {
+    return new Date(dateStr).toLocaleDateString(locale === 'pt' ? 'pt-BR' : 'es-ES', {
       day: 'numeric', month: 'long', year: 'numeric',
     });
   } catch {
@@ -33,12 +27,18 @@ function formatDate(dateStr) {
 }
 
 export default async function RecipientMessagesPage({ recipientId }) {
+  const [t, tv, locale] = await Promise.all([
+    getTranslations('recipient'),
+    getTranslations('view'),
+    getLocale(),
+  ]);
+
   const recipient = await getRecipient(recipientId);
   if (!recipient) {
     return (
       <div style={s.centered}>
-        <p style={s.notFoundText}>Destinatario no encontrado.</p>
-        <Link href="/my-messages" style={s.backLink}>← Volver</Link>
+        <p style={s.notFoundText}>{t('notFound')}</p>
+        <Link href="/my-messages" style={s.backLink}>{t('back')}</Link>
       </div>
     );
   }
@@ -50,13 +50,14 @@ export default async function RecipientMessagesPage({ recipientId }) {
   return (
     <div style={s.page}>
       <div style={s.header}>
-        <Link href="/my-messages" style={s.backBtn}>← Volver</Link>
+        <Link href="/my-messages" style={s.backBtn}>{t('back')}</Link>
         <div style={s.headerInner}>
           <div style={s.avatarCircle}>{emoji}</div>
           <h1 style={s.name}>{displayName}</h1>
           {recipient.relationship && <p style={s.rel}>{recipient.relationship}</p>}
           <p style={s.msgCount}>
-            {messages.length} {messages.length === 1 ? 'mensaje' : 'mensajes'}
+            {messages.length}{' '}
+            {messages.length === 1 ? t('messageOne') : t('messageOther')}
           </p>
         </div>
       </div>
@@ -64,39 +65,58 @@ export default async function RecipientMessagesPage({ recipientId }) {
       <div style={s.body}>
         {messages.length === 0 ? (
           <div style={s.emptyBox}>
-            <p style={s.emptyText}>Aún no hay mensajes para {displayName}.</p>
+            <p style={s.emptyText}>{t('empty', { name: displayName })}</p>
           </div>
         ) : (
           <div style={s.list}>
-            {messages.map((msg) => (
-              <Link key={msg.id} href={`/m/${msg.id}`} style={s.card}>
-                <div style={s.cardLeft}>
-                  <span style={s.tipoEmoji}>{TIPO_EMOJI[msg.tipo_mensaje] ?? '💌'}</span>
-                </div>
-                <div style={s.cardBody}>
-                  <p style={s.tipoLabel}>{TIPO_LABEL[msg.tipo_mensaje] ?? 'Mensaje'}</p>
-                  <p style={s.dateLabel}>📅 {formatDate(msg.delivery_date)}</p>
-                  {msg.file_type === 'audio' && <p style={s.attachTag}>🎙 Mensaje de voz</p>}
-                  {msg.file_type === 'video' && <p style={s.attachTag}>🎥 Video</p>}
-                  {msg.message_text && (
-                    <p style={s.preview}>
-                      "{msg.message_text.length > 60
-                        ? msg.message_text.slice(0, 60) + '…'
-                        : msg.message_text}"
-                    </p>
-                  )}
-                </div>
-                <div style={s.cardRight}>
-                  <span style={{ ...s.statusDot, backgroundColor: msg.delivered ? '#10B981' : '#D1D5DB' }} />
-                  <span style={s.arrow}>›</span>
-                </div>
-              </Link>
-            ))}
+            {messages.map((msg) => {
+              const msgStatus = msg.status ?? 'draft';
+              return (
+              <div key={msg.id} style={s.cardWrapper}>
+                <Link href={`/m/${msg.id}`} style={s.card}>
+                  <div style={s.cardLeft}>
+                    <span style={s.tipoEmoji}>{TIPO_EMOJI[msg.tipo_mensaje] ?? '💌'}</span>
+                  </div>
+                  <div style={s.cardBody}>
+                    <p style={s.tipoLabel}>{t(`tipos.${msg.tipo_mensaje}`) ?? 'Mensaje'}</p>
+                    <p style={s.dateLabel}>📅 {formatDate(msg.delivery_date, locale)}</p>
+                    {msg.file_type === 'audio' && <p style={s.attachTag}>{tv('audio')}</p>}
+                    {msg.file_type === 'video' && <p style={s.attachTag}>{tv('video')}</p>}
+                    {msg.message_text && (
+                      <p style={s.preview}>
+                        "{msg.message_text.length > 60
+                          ? msg.message_text.slice(0, 60) + '…'
+                          : msg.message_text}"
+                      </p>
+                    )}
+                  </div>
+                  <div style={s.cardRight}>
+                    <span style={{ ...s.statusDot, backgroundColor: msg.delivered ? '#10B981' : '#D1D5DB' }} />
+                    <span style={s.arrow}>›</span>
+                  </div>
+                </Link>
+
+                {msgStatus === 'draft' && (
+                  <Link href={`/schedule/${msg.id}`} style={s.scheduleBtn}>
+                    📅 {t('scheduleBtn')}
+                  </Link>
+                )}
+                {msgStatus === 'pending_payment' && (
+                  <Link href={`/payment/${msg.id}`} style={s.pendingBtn}>
+                    ⏳ {t('completePayment')}
+                  </Link>
+                )}
+                {msgStatus === 'scheduled' && (
+                  <div style={s.scheduledBadge}>✅ {t('scheduled')}</div>
+                )}
+              </div>
+            );})}
+
           </div>
         )}
 
         <Link href={`/create?recipientId=${recipientId}`} style={s.newBtn}>
-          + Nuevo mensaje para {recipient.name}
+          {t('newBtn', { name: recipient.name })}
         </Link>
 
         <div style={{ height: 32 }} />
@@ -131,6 +151,25 @@ const s = {
     display: 'flex', flexDirection: 'column', gap: 12, marginTop: -20,
   },
   list: { display: 'flex', flexDirection: 'column', gap: 10 },
+  cardWrapper: { display: 'flex', flexDirection: 'column', gap: 6 },
+  scheduleBtn: {
+    display: 'block', textAlign: 'center', padding: '10px 16px',
+    backgroundColor: 'transparent', color: '#7C3AED',
+    border: '1.5px solid #7C3AED',
+    fontWeight: 700, fontSize: 14, borderRadius: 10,
+    textDecoration: 'none',
+  },
+  pendingBtn: {
+    display: 'block', textAlign: 'center', padding: '10px 16px',
+    backgroundColor: '#6B7280', color: '#FFFFFF',
+    fontWeight: 700, fontSize: 14, borderRadius: 10,
+    textDecoration: 'none',
+  },
+  scheduledBadge: {
+    textAlign: 'center', padding: '8px 16px',
+    backgroundColor: '#D1FAE5', color: '#065F46',
+    fontWeight: 700, fontSize: 13, borderRadius: 10,
+  },
   card: {
     backgroundColor: '#FFFFFF', borderRadius: 14, padding: '14px 16px',
     display: 'flex', alignItems: 'center', gap: 12,
