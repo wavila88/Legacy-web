@@ -1,9 +1,11 @@
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+function getResend() {
+  return new Resend(process.env.RESEND_API_KEY);
+}
 
 export async function sendMagicLink({ to, magicLink }) {
-  return resend.emails.send({
+  return getResend().emails.send({
     from: 'Legado Mensajes <onboarding@resend.dev>',
     to,
     subject: '💌 Tu acceso a Legado Mensajes',
@@ -27,7 +29,7 @@ export async function sendMagicLink({ to, magicLink }) {
 }
 
 export async function sendMessageNotification({ to, recipientName, senderName, messageLink }) {
-  return resend.emails.send({
+  return getResend().emails.send({
     from: 'Legado Mensajes <onboarding@resend.dev>',
     to,
     subject: `💌 Tienes un mensaje especial de ${senderName}`,
