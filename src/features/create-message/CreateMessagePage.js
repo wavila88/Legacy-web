@@ -4,11 +4,24 @@ import { useState, useRef, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter, useSearchParams } from 'next/navigation';
 import VideoUploader from './components/VideoUploader';
+import PhoneInput from './components/PhoneInput';
 import { uploadFile } from './services/uploadService';
 import { minDeliveryDate, defaultDeliveryDate } from './utils/dateUtils';
 
 const RELATIONSHIP_VALUES = ['Hija','Hijo','Esposa','Esposo','Madre','Padre','Hermana','Hermano','Amiga','Amigo','Amor','Otro'];
 const TIPO_VALUES         = ['Birthday','Wedding','Anniversary','General'];
+const HOUR_OPTIONS        = Array.from({ length: 17 }, (_, i) => {
+  const h = String(i + 6).padStart(2, '0');
+  return `${h}:00`;
+}); // 06:00 → 22:00
+
+function localOffset() {
+  const off  = -new Date().getTimezoneOffset();
+  const sign = off >= 0 ? '+' : '-';
+  const h    = String(Math.floor(Math.abs(off) / 60)).padStart(2, '0');
+  const m    = String(Math.abs(off) % 60).padStart(2, '0');
+  return `${sign}${h}:${m}`;
+}
 
 function blobToDataURL(blob) {
   return new Promise((resolve, reject) => {
@@ -168,9 +181,9 @@ export default function CreateMessagePage() {
         file_type = 'audio';
       }
 
-      // Combine date and time for delivery
+      // Combine date + time + browser timezone offset so QStash can schedule exactly
       const delivery_date = form.delivery_time
-        ? `${form.delivery_date}T${form.delivery_time}:00`
+        ? `${form.delivery_date}T${form.delivery_time}:00${localOffset()}`
         : form.delivery_date;
 
       const res = await fetch('/api/messages', {
@@ -257,13 +270,11 @@ export default function CreateMessagePage() {
             />
           </Field>
           <Field label={t('senderPhone')} error={null}>
-            <input
-              className="field-input"
-              type="tel"
-              inputMode="tel"
-              placeholder={t('senderPhonePlaceholder')}
+            <PhoneInput
               value={form.client_phone}
-              onChange={(e) => set('client_phone', e.target.value)}
+              onChange={(v) => set('client_phone', v)}
+              placeholder={t('senderPhonePlaceholder')}
+              className="field-input"
             />
           </Field>
         </div>
@@ -322,13 +333,11 @@ export default function CreateMessagePage() {
             />
           </Field>
           <Field label={t('recipientPhone')} error={null}>
-            <input
-              className="field-input"
-              type="tel"
-              inputMode="tel"
-              placeholder={t('recipientPhonePlaceholder')}
+            <PhoneInput
               value={form.recipient_phone}
-              onChange={(e) => set('recipient_phone', e.target.value)}
+              onChange={(v) => set('recipient_phone', v)}
+              placeholder={t('recipientPhonePlaceholder')}
+              className="field-input"
             />
           </Field>
         </div>
@@ -362,12 +371,16 @@ export default function CreateMessagePage() {
               />
             </Field>
             <Field label={t('deliveryTime')} error={null} style={{ flex: 1 }}>
-              <input
+              <select
                 className="field-input"
-                type="time"
+                style={s.select}
                 value={form.delivery_time}
                 onChange={(e) => set('delivery_time', e.target.value)}
-              />
+              >
+                {HOUR_OPTIONS.map((h) => (
+                  <option key={h} value={h}>{h}</option>
+                ))}
+              </select>
             </Field>
           </div>
         </div>

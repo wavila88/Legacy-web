@@ -1,28 +1,24 @@
-import { findMessagesDueToday, markAsDelivered } from './repository/messageRepository';
+import { findMessagesDue, markAsSent, markAsFailed } from './repository/messageRepository';
 
-export async function sendDeliveryEmail(message) {
-  const privateLink = `${process.env.NEXT_PUBLIC_BASE_URL ?? 'http://localhost:3000'}/m/${message.id}`;
-
-  // ── Replace with: await resend.emails.send({ to, subject, html }) ──
-  console.log('[DELIVERY] ✉️  Sending message', message.id);
-  console.log('  To:      ', message.email);
-  console.log('  Child:   ', message.child_name);
-  console.log('  From:    ', message.parent_name);
-  console.log('  Link:    ', privateLink);
-  // ────────────────────────────────────────────────────────────────────
-
-  await markAsDelivered(message.id);
-  return { success: true, message_id: message.id };
+export async function deliverMessage(message) {
+  try {
+    // TODO: reemplazar con WhatsApp Cloud API
+    // await sendWhatsApp({ to: message.child_phone, ... });
+    console.log('[DELIVERY] Sending message', message.id, '→', message.child_phone);
+    await markAsSent(message.id);
+    return { success: true, message_id: message.id };
+  } catch (err) {
+    console.error('[DELIVERY] Failed', message.id, err);
+    await markAsFailed(message.id);
+    return { success: false, message_id: message.id };
+  }
 }
 
 export async function runDailyDelivery() {
-  const due = await findMessagesDueToday();
-  if (due.length === 0) {
-    console.log('[DELIVERY] No messages due today.');
-    return { processed: 0 };
-  }
-  const results = await Promise.allSettled(due.map(sendDeliveryEmail));
-  const processed = results.filter((r) => r.status === 'fulfilled').length;
-  console.log(`[DELIVERY] Processed ${processed}/${due.length} messages.`);
+  const due = await findMessagesDue();
+  if (due.length === 0) return { processed: 0 };
+  const results  = await Promise.allSettled(due.map(deliverMessage));
+  const processed = results.filter((r) => r.status === 'fulfilled' && r.value.success).length;
+  console.log(`[DELIVERY] Processed ${processed}/${due.length}`);
   return { processed, total: due.length };
 }

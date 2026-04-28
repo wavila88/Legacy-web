@@ -1,4 +1,4 @@
-import { eq, and, lte } from 'drizzle-orm';
+import { eq, and, lte, sql } from 'drizzle-orm';
 import { db } from './index.js';
 import { messages, recipients, clients } from './schema.js';
 
@@ -67,35 +67,48 @@ export async function updateMessagePayment(id, { status, payment_id, payment_amo
 
 export async function getMessageByPaymentId(payment_id) {
   const [row] = await db
-    .select({ id: messages.id, status: messages.status })
+    .select({ id: messages.id, status: messages.status, delivery_date: messages.delivery_date })
     .from(messages)
     .where(eq(messages.payment_id, payment_id))
     .limit(1);
   return row ?? null;
 }
 
-export async function findMessagesDueToday() {
-  const today = new Date().toISOString().split('T')[0];
+export async function markAsSent(id) {
+  const [updated] = await db
+    .update(messages)
+    .set({ delivered: true, status: 'sent' })
+    .where(eq(messages.id, id))
+    .returning();
+  return updated;
+}
+
+export async function markAsFailed(id) {
+  const [updated] = await db
+    .update(messages)
+    .set({ status: 'failed' })
+    .where(eq(messages.id, id))
+    .returning();
+  return updated;
+}
+
+export async function findMessagesDue() {
   return db
     .select({
-      id:           messages.id,
+      id:            messages.id,
       delivery_date: messages.delivery_date,
       message_text:  messages.message_text,
       email:         recipients.email,
+      child_phone:   recipients.phone,
       child_name:    recipients.name,
       parent_name:   clients.name,
     })
     .from(messages)
     .innerJoin(recipients, eq(messages.recipient_id, recipients.id))
     .innerJoin(clients,    eq(messages.client_id,    clients.id))
-    .where(and(lte(messages.delivery_date, today), eq(messages.delivered, false)));
+    .where(and(
+      eq(messages.status, 'scheduled'),
+      lte(sql`${messages.delivery_date}::timestamptz`, sql`NOW()`),
+    ));
 }
 
-export async function markAsDelivered(id) {
-  const [updated] = await db
-    .update(messages)
-    .set({ delivered: true })
-    .where(eq(messages.id, id))
-    .returning();
-  return updated;
-}
