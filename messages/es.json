@@ -28,7 +28,8 @@
     "messageOther": "mensajes",
     "logout": "Cerrar sesión",
     "errorInvalid": "Link inválido.",
-    "errorExpired": "El link expiró. Solicita uno nuevo."
+    "errorExpired": "El link expiró. Solicita uno nuevo.",
+    "back": "← Volver"
   },
   "recipient": {
     "back": "← Volver",

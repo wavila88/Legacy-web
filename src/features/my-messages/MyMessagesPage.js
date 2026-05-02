@@ -94,6 +94,7 @@ export default function MyMessagesPage() {
   return (
     <div style={s.page}>
       <div style={s.header}>
+        <button style={s.backBtn} onClick={() => router.back()}>← {t('back')}</button>
         <div style={s.headerInner}>
           <div style={s.iconCircle}>💌</div>
           <h1 style={s.title}>{t('title')}</h1>
@@ -205,8 +206,15 @@ const s = {
   page: { minHeight: '100dvh', backgroundColor: '#F5F3FF', display: 'flex', flexDirection: 'column' },
   header: {
     background: 'linear-gradient(160deg, #5B21B6 0%, #7C3AED 100%)',
-    padding: '56px 24px 48px',
+    padding: '20px 24px 48px',
     textAlign: 'center',
+    position: 'relative',
+  },
+  backBtn: {
+    position: 'absolute', top: 20, left: 20,
+    background: 'none', border: 'none',
+    color: 'rgba(255,255,255,0.85)', fontSize: 14, fontWeight: 600,
+    cursor: 'pointer', padding: 0,
   },
   headerInner: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 },
   iconCircle: {
