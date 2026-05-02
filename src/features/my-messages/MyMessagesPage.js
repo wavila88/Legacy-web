@@ -94,7 +94,7 @@ export default function MyMessagesPage() {
   return (
     <div style={s.page}>
       <div style={s.header}>
-        <button style={s.backBtn} onClick={() => router.push('/')}>← {t('back')}</button>
+        <button style={s.backBtn} onClick={() => router.push('/')}>{t('back')}</button>
         <div style={s.headerInner}>
           <div style={s.iconCircle}>💌</div>
           <h1 style={s.title}>{t('title')}</h1>
