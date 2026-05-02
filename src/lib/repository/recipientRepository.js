@@ -29,6 +29,7 @@ export async function getRecipientsWithMessageCount(client_id) {
       relationship:  recipients.relationship,
       email:         recipients.email,
       phone:         recipients.phone,
+      created_at:    recipients.created_at,
       message_count: count(messages.id),
     })
     .from(recipients)
@@ -41,6 +42,7 @@ export async function getRecipientsWithMessageCount(client_id) {
       recipients.relationship,
       recipients.email,
       recipients.phone,
+      recipients.created_at,
     );
 }
 

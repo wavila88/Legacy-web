@@ -29,7 +29,15 @@
     "logout": "Cerrar sesión",
     "errorInvalid": "Link inválido.",
     "errorExpired": "El link expiró. Solicita uno nuevo.",
-    "back": "← Volver"
+    "back": "← Volver",
+    "search": "Buscar mensajes…",
+    "newest": "Más recientes",
+    "oldest": "Más antiguos",
+    "createdOn": "Creado el",
+    "createCardTitle": "¿Aún no tienes mensajes?",
+    "createCardSub": "Crea tu primer mensaje para esa persona especial.",
+    "createBtnLabel": "Crear mensaje",
+    "footer": "Tus mensajes están seguros y son privados."
   },
   "recipient": {
     "back": "← Volver",
