@@ -2,6 +2,7 @@ import { getTranslations, getLocale } from 'next-intl/server';
 import { Link } from '@/lib/navigation';
 import { getMessage } from '../../lib/repository/messageRepository';
 import MediaPlayer from './MediaPlayer';
+import BackButton from './BackButton';
 
 export async function generateMetadata(id) {
   const message = await getMessage(id);
@@ -47,7 +48,7 @@ export default async function ViewMessagePage({ id }) {
   return (
     <div style={s.page}>
       <div style={s.header}>
-        <Link href="/my-messages" style={s.backBtn}>{t('back')}</Link>
+        <BackButton label={t('back')} />
         <div style={s.headerInner}>
           <div style={s.envelopeCircle}>💌</div>
           <p style={s.from}>{t('from')}</p>
@@ -115,11 +116,6 @@ const s = {
     padding: '20px 28px 48px',
     textAlign: 'center',
     position: 'relative',
-  },
-  backBtn: {
-    position: 'absolute', top: 20, left: 20,
-    color: 'rgba(255,255,255,0.85)', fontSize: 14, fontWeight: 600,
-    textDecoration: 'none',
   },
   headerInner: {
     display: 'flex',
