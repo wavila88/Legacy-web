@@ -210,7 +210,7 @@ export default function CreateMessagePage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? t('errorSave'));
 
-      router.push(`/success?id=${data.id}`);
+      router.push(`/m/${data.id}`);
     } catch (err) {
       alert(err.message);
     } finally {
