@@ -56,6 +56,16 @@ export async function getMessagesByRecipient(recipient_id) {
     .orderBy(messages.delivery_date);
 }
 
+export async function updateMessage(id, fields) {
+  const clean = Object.fromEntries(Object.entries(fields).filter(([, v]) => v !== undefined));
+  const [updated] = await db
+    .update(messages)
+    .set(clean)
+    .where(eq(messages.id, id))
+    .returning();
+  return updated ?? null;
+}
+
 export async function updateMessagePayment(id, { status, payment_id, payment_amount }) {
   const [updated] = await db
     .update(messages)

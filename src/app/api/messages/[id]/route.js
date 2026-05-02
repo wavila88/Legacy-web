@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getMessage } from '@/lib/repository/messageRepository';
+import { getMessage, updateMessage } from '@/lib/repository/messageRepository';
 
 export async function GET(request, { params }) {
   const { id } = params;
@@ -17,4 +17,22 @@ export async function GET(request, { params }) {
   delete response.file_data;
 
   return NextResponse.json(response);
+}
+
+export async function PUT(request, { params }) {
+  const { id } = await params;
+  const body = await request.json();
+
+  const fields = {
+    tipo_mensaje:  body.tipo_mensaje  ?? undefined,
+    delivery_date: body.delivery_date ?? undefined,
+    message_text:  body.message_text  ?? null,
+    file_url:      body.file_url      ?? null,
+    file_type:     body.file_type     ?? null,
+    file_data:     body.file_data     ? Buffer.from(body.file_data.split(',')[1], 'base64') : null,
+  };
+
+  const updated = await updateMessage(id, fields);
+  if (!updated) return NextResponse.json({ error: 'not_found' }, { status: 404 });
+  return NextResponse.json(updated);
 }

@@ -69,6 +69,7 @@ export default function CreateMessagePage() {
 
   const [msgOpen,    setMsgOpen]    = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [editId,     setEditId]     = useState(null);
 
   const set = (field, value) => {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -77,6 +78,41 @@ export default function CreateMessagePage() {
 
   useEffect(() => {
     const recipientId = searchParams.get('recipientId');
+    const editMsgId   = searchParams.get('edit');
+
+    if (editMsgId) {
+      setEditId(editMsgId);
+      fetch(`/api/messages/${editMsgId}`)
+        .then((r) => r.json())
+        .then((msg) => {
+          if (!msg || msg.error) return;
+          const [datePart, timePart] = (msg.delivery_date ?? '').split('T');
+          const timeClean = timePart ? timePart.slice(0, 5) : '09:00';
+          const hourOnly  = HOUR_OPTIONS.includes(timeClean) ? timeClean : `${timeClean.slice(0, 2)}:00`;
+          setForm((prev) => ({
+            ...prev,
+            parent_name:     msg.parent_name     ?? '',
+            parent_nickname: msg.parent_nickname ?? '',
+            client_email:    msg.client_email    ?? '',
+            child_name:      msg.child_name      ?? '',
+            nickname:        msg.nickname        ?? '',
+            relationship:    msg.relationship    ?? 'Otro',
+            recipient_email: msg.email           ?? '',
+            delivery_date:   datePart            ?? prev.delivery_date,
+            delivery_time:   hourOnly,
+            tipo_mensaje:    msg.tipo_mensaje     ?? 'Birthday',
+            message_text:    msg.message_text     ?? '',
+          }));
+          if (msg.file_url) {
+            setAudioURL(msg.file_url);
+            setAttachType(msg.file_type === 'video' ? 'video' : 'audio');
+          }
+          setPrefilled(true);
+        })
+        .catch(() => {});
+      return;
+    }
+
     if (!recipientId) return;
     fetch(`/api/my-messages/${recipientId}`)
       .then((r) => r.json())
@@ -186,31 +222,48 @@ export default function CreateMessagePage() {
         ? `${form.delivery_date}T${form.delivery_time}:00${localOffset()}`
         : form.delivery_date;
 
-      const res = await fetch('/api/messages', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          parent_name:     form.parent_name,
-          parent_nickname: form.parent_nickname || null,
-          client_email:    form.client_email,
-          client_phone:    form.client_phone || null,
-          child_name:      form.child_name,
-          nickname:        form.nickname || null,
-          relationship:    form.relationship || null,
-          recipient_email: form.recipient_email || null,
-          recipient_phone: form.recipient_phone || null,
-          tipo_mensaje:    form.tipo_mensaje,
-          delivery_date,
-          file_url,
-          file_type,
-          message_text:    form.message_text || null,
-        }),
-      });
+      let res, data;
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? t('errorSave'));
-
-      router.push(`/m/${data.id}`);
+      if (editId) {
+        res = await fetch(`/api/messages/${editId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            tipo_mensaje:  form.tipo_mensaje,
+            delivery_date,
+            message_text:  form.message_text || null,
+            file_url:      file_url ?? (audioURL || null),
+            file_type:     file_type ?? (audioURL ? 'audio' : null),
+          }),
+        });
+        data = await res.json();
+        if (!res.ok) throw new Error(data.error ?? t('errorSave'));
+        router.push(`/m/${editId}`);
+      } else {
+        res = await fetch('/api/messages', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            parent_name:     form.parent_name,
+            parent_nickname: form.parent_nickname || null,
+            client_email:    form.client_email,
+            client_phone:    form.client_phone || null,
+            child_name:      form.child_name,
+            nickname:        form.nickname || null,
+            relationship:    form.relationship || null,
+            recipient_email: form.recipient_email || null,
+            recipient_phone: form.recipient_phone || null,
+            tipo_mensaje:    form.tipo_mensaje,
+            delivery_date,
+            file_url,
+            file_type,
+            message_text:    form.message_text || null,
+          }),
+        });
+        data = await res.json();
+        if (!res.ok) throw new Error(data.error ?? t('errorSave'));
+        router.push(`/m/${data.id}`);
+      }
     } catch (err) {
       alert(err.message);
     } finally {

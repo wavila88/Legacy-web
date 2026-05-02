@@ -56,6 +56,8 @@
     "audio": "🎙 Mensaje de voz",
     "text": "✍️ Mensaje",
     "myMessages": "💌 Ver mis mensajes",
+    "edit": "✏️ Editar mensaje",
+    "back": "← Mis mensajes",
     "notFound": "Mensaje no encontrado",
     "notFoundSub": "Este enlace no existe o ya expiró.",
     "goHome": "Ir al inicio"

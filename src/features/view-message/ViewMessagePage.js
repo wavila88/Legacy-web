@@ -47,6 +47,7 @@ export default async function ViewMessagePage({ id }) {
   return (
     <div style={s.page}>
       <div style={s.header}>
+        <Link href="/my-messages" style={s.backBtn}>{t('back')}</Link>
         <div style={s.headerInner}>
           <div style={s.envelopeCircle}>💌</div>
           <p style={s.from}>{t('from')}</p>
@@ -89,6 +90,9 @@ export default async function ViewMessagePage({ id }) {
           </div>
         )}
 
+        <Link href={`/create?edit=${id}`} style={s.editBtn}>
+          {t('edit')}
+        </Link>
         <Link href="/my-messages" style={s.myMessagesBtn}>
           {t('myMessages')}
         </Link>
@@ -108,8 +112,14 @@ const s = {
   },
   header: {
     background: 'linear-gradient(160deg, #5B21B6 0%, #7C3AED 100%)',
-    padding: '56px 28px 48px',
+    padding: '20px 28px 48px',
     textAlign: 'center',
+    position: 'relative',
+  },
+  backBtn: {
+    position: 'absolute', top: 20, left: 20,
+    color: 'rgba(255,255,255,0.85)', fontSize: 14, fontWeight: 600,
+    textDecoration: 'none',
   },
   headerInner: {
     display: 'flex',
@@ -177,6 +187,14 @@ const s = {
     color: '#1F2937',
     lineHeight: 1.7,
     whiteSpace: 'pre-wrap',
+  },
+  editBtn: {
+    display: 'block', textAlign: 'center',
+    padding: '14px 24px',
+    backgroundColor: 'transparent',
+    color: '#7C3AED', fontWeight: 700, fontSize: 16,
+    borderRadius: 12, textDecoration: 'none',
+    border: '2px solid #7C3AED',
   },
   myMessagesBtn: {
     display: 'block',
