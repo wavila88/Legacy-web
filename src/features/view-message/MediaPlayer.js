@@ -74,9 +74,16 @@ export default function MediaPlayer({ url, isVideo }) {
     );
   }
 
+  const barWidth = `calc(${(100 / BAR_COUNT).toFixed(4)}% - ${((2 * (BAR_COUNT - 1)) / BAR_COUNT).toFixed(4)}px)`;
+
   return (
     <div style={s.wrap}>
-      <audio ref={ref} src={url} preload="metadata" />
+      <audio
+        ref={ref}
+        src={url}
+        preload="metadata"
+        onLoadedMetadata={() => ref.current && setDuration(ref.current.duration)}
+      />
 
       {/* Play / Pause button */}
       <button style={s.playBtn} onClick={togglePlay} aria-label={playing ? 'Pause' : 'Play'}>
@@ -96,6 +103,7 @@ export default function MediaPlayer({ url, isVideo }) {
                 key={i}
                 style={{
                   ...s.bar,
+                  width: barWidth,
                   height: `${h * 100}%`,
                   backgroundColor: active ? '#7C3AED' : '#DDD6FE',
                 }}
@@ -134,8 +142,9 @@ const s = {
   waveWrap: {
     display: 'flex', alignItems: 'center', gap: 2,
     height: 44, cursor: 'pointer', userSelect: 'none',
+    width: '100%',
   },
-  bar:      { width: 3, flexShrink: 0, borderRadius: 3, minHeight: 4, transition: 'background-color 0.1s' },
+  bar:      { flexShrink: 0, borderRadius: 3, minHeight: 4, transition: 'background-color 0.1s' },
   timeRow:  { display: 'flex', justifyContent: 'space-between' },
   time:     { fontSize: 11, color: '#9CA3AF', fontVariantNumeric: 'tabular-nums' },
 };
