@@ -148,7 +148,7 @@ const s = {
   msgCount: { fontSize: 13, color: 'rgba(255,255,255,0.6)', margin: 0 },
   body: {
     flex: 1, padding: '20px 16px',
-    display: 'flex', flexDirection: 'column', gap: 12, marginTop: -20,
+    display: 'flex', flexDirection: 'column', gap: 12,
   },
   list: { display: 'flex', flexDirection: 'column', gap: 10 },
   cardWrapper: { display: 'flex', flexDirection: 'column', gap: 6 },
