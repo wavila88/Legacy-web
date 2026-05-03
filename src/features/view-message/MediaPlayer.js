@@ -135,7 +135,7 @@ const s = {
     display: 'flex', alignItems: 'center', gap: 2,
     height: 44, cursor: 'pointer', userSelect: 'none',
   },
-  bar:      { flex: 1, borderRadius: 3, minHeight: 4, transition: 'background-color 0.1s' },
+  bar:      { width: 3, flexShrink: 0, borderRadius: 3, minHeight: 4, transition: 'background-color 0.1s' },
   timeRow:  { display: 'flex', justifyContent: 'space-between' },
   time:     { fontSize: 11, color: '#9CA3AF', fontVariantNumeric: 'tabular-nums' },
 };
