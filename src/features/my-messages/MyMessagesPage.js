@@ -202,7 +202,7 @@ export default function MyMessagesPage() {
             </div>
 
             <button style={s.btnPrimary} onClick={() => router.push('/create')}>
-              + {t('newMessage')}
+              {t('newMessage')}
             </button>
 
             <p style={s.footer}>🔒 {t('footer')}</p>
@@ -217,13 +217,13 @@ export default function MyMessagesPage() {
 
 const s = {
   page:       { minHeight: '100dvh', backgroundColor: '#F5F3FF', display: 'flex', flexDirection: 'column' },
-  header:     { background: 'linear-gradient(160deg, #5B21B6 0%, #7C3AED 100%)', padding: '20px 24px 56px', textAlign: 'center', position: 'relative' },
+  header:     { background: 'linear-gradient(160deg, #5B21B6 0%, #7C3AED 100%)', padding: '20px 24px 40px', textAlign: 'center', position: 'relative' },
   backBtn:    { position: 'absolute', top: 20, left: 20, background: 'none', border: 'none', color: 'rgba(255,255,255,0.85)', fontSize: 14, fontWeight: 600, cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', gap: 4 },
   headerInner:{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 },
   iconBox:    { width: 72, height: 72, borderRadius: 20, backgroundColor: '#FFFFFF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 34, marginBottom: 4, boxShadow: '0 4px 16px rgba(0,0,0,0.12)' },
   title:      { fontSize: 26, fontWeight: 800, color: '#FFFFFF', margin: 0 },
   subtitle:   { fontSize: 14, color: 'rgba(255,255,255,0.75)', margin: 0, lineHeight: 1.5, maxWidth: 280 },
-  body:       { flex: 1, padding: '0 16px 32px', display: 'flex', flexDirection: 'column', gap: 16, marginTop: -28 },
+  body:       { flex: 1, padding: '16px 16px 32px', display: 'flex', flexDirection: 'column', gap: 16 },
   topRow:     { display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 4 },
   greeting:   { fontSize: 18, fontWeight: 700, color: '#1F2937', margin: 0 },
   controls:   { display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' },
