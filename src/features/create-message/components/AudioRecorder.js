@@ -3,6 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { useAudioRecorder } from '../hooks/useAudioRecorder';
 import { formatTime } from '../utils/dateUtils';
+import MediaPlayer from '../../view-message/MediaPlayer';
 
 const WAVE_HEIGHTS = [6, 14, 20, 12, 18, 24, 10, 16, 22, 8, 20, 14, 18, 24, 10, 16, 12, 22, 8, 16];
 
@@ -35,9 +36,15 @@ export default function AudioRecorder({ onRecordingChange }) {
   return (
     <div style={s.recorderBox}>
       {audioURL ? (
-        <div style={s.playbackRow}>
-          <audio controls src={audioURL} style={s.audioPlayer} />
-          <button type="button" style={s.deleteBtn} onClick={handleClear}>🗑️</button>
+        <div style={s.playbackWrap}>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <MediaPlayer url={audioURL} isVideo={false} />
+          </div>
+          <button type="button" style={s.deleteBtn} onClick={handleClear} title="Eliminar">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/>
+            </svg>
+          </button>
         </div>
       ) : (
         <div style={s.micRow}>
@@ -83,8 +90,7 @@ const s = {
   },
   micBtnRecording: { backgroundColor: '#FEE2E2', borderColor: '#DC2626' },
   micHint: { fontSize: 13, color: '#6B7280', textAlign: 'center' },
-  playbackRow: { display: 'flex', alignItems: 'center', gap: 8 },
-  audioPlayer: { flex: 1, height: 40, accentColor: '#7C3AED' },
-  deleteBtn: { background: 'none', border: 'none', fontSize: 20, cursor: 'pointer', padding: 4 },
+  playbackWrap: { display: 'flex', alignItems: 'center', gap: 8 },
+  deleteBtn: { background: 'none', border: 'none', cursor: 'pointer', padding: 4, flexShrink: 0 },
   savedLabel: { fontSize: 13, color: '#059669', fontWeight: 600, textAlign: 'center' },
 };

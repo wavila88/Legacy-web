@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter, useSearchParams } from 'next/navigation';
 import VideoUploader from './components/VideoUploader';
+import MediaPlayer from '../view-message/MediaPlayer';
 import PhoneInput from './components/PhoneInput';
 import { uploadFile } from './services/uploadService';
 import { minDeliveryDate, defaultDeliveryDate } from './utils/dateUtils';
@@ -491,8 +492,14 @@ export default function CreateMessagePage() {
             <div style={s.recorderBox}>
               {audioURL ? (
                 <div style={s.playbackRow}>
-                  <audio controls src={audioURL} style={s.audioPlayer} />
-                  <button type="button" style={s.deleteBtn} onClick={deleteRecording}>🗑️</button>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <MediaPlayer url={audioURL} isVideo={false} />
+                  </div>
+                  <button type="button" style={s.deleteBtn} onClick={deleteRecording}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/>
+                    </svg>
+                  </button>
                 </div>
               ) : (
                 <div style={s.micRow}>
@@ -738,11 +745,6 @@ const s = {
     display: 'flex',
     alignItems: 'center',
     gap: 8,
-  },
-  audioPlayer: {
-    flex: 1,
-    height: 40,
-    accentColor: '#7C3AED',
   },
   deleteBtn: {
     background: 'none',
