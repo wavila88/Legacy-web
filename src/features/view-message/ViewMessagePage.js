@@ -161,12 +161,12 @@ const s = {
 
   infoRow:   { display: 'flex', alignItems: 'center', gap: 14, padding: '4px 0' },
   iconCircle: {
-    width: 40, height: 40, borderRadius: 12,
+    width: 44, height: 44, borderRadius: '50%',
     backgroundColor: '#EDE9FE',
     display: 'flex', alignItems: 'center', justifyContent: 'center',
     fontSize: 20, flexShrink: 0,
   },
-  infoLabel: { fontSize: 12, color: '#9CA3AF', margin: 0, textTransform: 'uppercase', letterSpacing: 0.5, fontWeight: 600 },
+  infoLabel: { fontSize: 13, color: '#9CA3AF', margin: 0 },
   infoValue: { fontSize: 16, fontWeight: 700, color: '#1F2937', margin: '2px 0 0' },
   divider:   { height: 1, backgroundColor: '#F3F4F6', margin: '12px 0' },
 
