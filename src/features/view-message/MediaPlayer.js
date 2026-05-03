@@ -2,14 +2,14 @@
 
 import { useRef, useState, useEffect, useMemo } from 'react';
 
-const BAR_COUNT = 40;
+const BAR_COUNT = 72;
 
 function seedBars(seed) {
   const bars = [];
   let n = seed;
   for (let i = 0; i < BAR_COUNT; i++) {
     n = (n * 1664525 + 1013904223) & 0xffffffff;
-    bars.push(0.25 + ((n >>> 0) / 0xffffffff) * 0.75);
+    bars.push(0.15 + ((n >>> 0) / 0xffffffff) * 0.65);
   }
   return bars;
 }
@@ -74,7 +74,7 @@ export default function MediaPlayer({ url, isVideo }) {
     );
   }
 
-  const barWidth = `calc(${(100 / BAR_COUNT).toFixed(4)}% - ${((2 * (BAR_COUNT - 1)) / BAR_COUNT).toFixed(4)}px)`;
+  const barWidth = `calc(${(100 / BAR_COUNT).toFixed(4)}% - ${((1 * (BAR_COUNT - 1)) / BAR_COUNT).toFixed(4)}px)`;
 
   return (
     <div style={s.wrap}>
@@ -140,11 +140,11 @@ const s = {
   pauseBar:  { width: 4, height: 18, backgroundColor: '#FFFFFF', borderRadius: 2 },
   right:    { flex: 1, display: 'flex', flexDirection: 'column', gap: 6 },
   waveWrap: {
-    display: 'flex', alignItems: 'center', gap: 2,
-    height: 44, cursor: 'pointer', userSelect: 'none',
+    display: 'flex', alignItems: 'center', gap: 1,
+    height: 28, cursor: 'pointer', userSelect: 'none',
     width: '100%',
   },
-  bar:      { flexShrink: 0, borderRadius: 3, minHeight: 4, transition: 'background-color 0.1s' },
+  bar:      { flexShrink: 0, borderRadius: 2, minHeight: 3, transition: 'background-color 0.1s' },
   timeRow:  { display: 'flex', justifyContent: 'space-between' },
   time:     { fontSize: 11, color: '#9CA3AF', fontVariantNumeric: 'tabular-nums' },
 };
