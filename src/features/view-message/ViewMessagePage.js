@@ -174,7 +174,7 @@ const s = {
     padding: '6px 18px', borderRadius: 20, marginTop: 4,
   },
 
-  body: { flex: 1, padding: '0 16px 40px', display: 'flex', flexDirection: 'column', gap: 14, marginTop: -24 },
+  body: { flex: 1, padding: '16px 16px 40px', display: 'flex', flexDirection: 'column', gap: 14 },
 
   card: {
     backgroundColor: '#FFFFFF', borderRadius: 20,
