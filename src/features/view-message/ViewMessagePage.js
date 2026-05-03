@@ -4,6 +4,23 @@ import { getMessage } from '../../lib/repository/messageRepository';
 import MediaPlayer from './MediaPlayer';
 import BackButton from './BackButton';
 
+function PencilIcon() {
+  return (
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/>
+    </svg>
+  );
+}
+
+function EnvelopeIcon() {
+  return (
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="2" y="4" width="20" height="16" rx="2"/>
+      <path d="M22 7l-10 7L2 7"/>
+    </svg>
+  );
+}
+
 export async function generateMetadata(id) {
   const message = await getMessage(id);
   if (!message) return { title: 'Mensaje no encontrado' };
@@ -118,20 +135,14 @@ export default async function ViewMessagePage({ id }) {
 
         {/* Botones */}
         <Link href={`/create?edit=${id}`} style={s.btnPrimary}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-          </svg>
-          {t('edit')}
+          <PencilIcon />
+          {t('editLabel')}
         </Link>
         <Link href="/my-messages" style={s.btnOutline}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-            <polyline points="22,6 12,13 2,6"/>
-          </svg>
-          {t('myMessages')}
+          <EnvelopeIcon />
+          {t('myMessagesLabel')}
         </Link>
-        <p style={s.footer}>&#128274; {t('footer')}</p>
+        <p style={s.footer}>{t('footer')}</p>
 
       </div>
     </div>
